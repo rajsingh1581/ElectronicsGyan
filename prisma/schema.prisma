@@ -1,0 +1,93 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id        String    @id @default(cuid())
+  email     String    @unique
+  name      String?
+  role      Role      @default(USER)
+  projects  Project[]
+  articles  Article[]
+  createdAt DateTime  @default(now())
+  updatedAt DateTime  @updatedAt
+}
+
+enum Role {
+  USER
+  ADMIN
+  AUTHOR
+}
+
+model Category {
+  id          String    @id @default(cuid())
+  name        String    @unique // e.g., "Electronics", "Software", "Mechanical"
+  slug        String    @unique
+  description String?
+  projects    Project[]
+  articles    Article[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}
+
+model Project {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  description String
+  content     String   @db.Text
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  bom         BomItem[]
+  sourceLink  String?  // Link to downloadable source code/Gerber
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Article {
+  id          String   @id @default(cuid())
+  title       String
+  slug        String   @unique
+  content     String   @db.Text // Markdown/MDX content
+  categoryId  String
+  category    Category @relation(fields: [categoryId], references: [id])
+  authorId    String
+  author      User     @relation(fields: [authorId], references: [id])
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+// Bill of Materials
+model BomItem {
+  id             String    @id @default(cuid())
+  projectId      String
+  project        Project   @relation(fields: [projectId], references: [id], onDelete: Cascade)
+  componentId    String?
+  component      Component? @relation(fields: [componentId], references: [id])
+  quantity       Int
+  designator     String?   // e.g., R1, C1
+  remarks        String?
+}
+
+// Component Database
+model Component {
+  id          String    @id @default(cuid())
+  name        String
+  category    String    // e.g., Microcontroller, IC, Sensor
+  description String?
+  datasheet   String?   // URL to datasheet
+  pinoutImage String?   // URL to pinout image
+  bomItems    BomItem[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+}

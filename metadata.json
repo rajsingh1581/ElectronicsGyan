@@ -1,0 +1,6 @@
+{
+  "name": "Electronics Gyan",
+  "description": "A comprehensive, scalable, content-rich engineering community and resource platform.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
