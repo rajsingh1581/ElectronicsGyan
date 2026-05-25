@@ -14,7 +14,7 @@ export default function ContactPage() {
           Get in <span className="text-brand">Touch</span>
         </h1>
         <p className="text-lg text-gray-400 max-w-2xl">
-          Whether you have a question about our engineering components, need support with a project, or want to discuss a partnership, we're here to help.
+          Whether you have a question about our engineering components, need support with a project, or want to discuss a partnership, we&apos;re here to help.
         </p>
       </div>
 
