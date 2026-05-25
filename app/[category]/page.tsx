@@ -1,40 +1,10 @@
 import { notFound } from 'next/navigation';
 import Image from 'next/image';
 import Link from 'next/link';
-import { ArrowRight, Cpu, Code2, PenTool, Activity, Lightbulb, HeartPulse } from 'lucide-react';
+import { ArrowRight, Lightbulb } from 'lucide-react';
 
 // Define valid categories and their metadata
 const categoriesData: Record<string, { title: string; description: string; icon: React.ReactNode; sub: string[] }> = {
-  electronics: {
-    title: 'Electronics',
-    description: 'Explore hardware engineering, microcontrollers, IoT, and analog circuits.',
-    icon: <Cpu className="h-10 w-10 text-brand" />,
-    sub: ['embedded', 'iot', 'robotics', 'analog'],
-  },
-  software: {
-    title: 'Software',
-    description: 'Deep dives into algorithms, backend systems, and modern web frameworks.',
-    icon: <Code2 className="h-10 w-10 text-brand" />,
-    sub: ['python', 'c-cpp', 'web'],
-  },
-  mechanical: {
-    title: 'Mechanical',
-    description: 'Robotics, automation, mechanics, and CAD design resources.',
-    icon: <PenTool className="h-10 w-10 text-brand" />,
-    sub: ['cad', 'automation'],
-  },
-  instrumentation: {
-    title: 'Instrumentation',
-    description: 'Sensors, industrial automation, and PLC programming insights.',
-    icon: <Activity className="h-10 w-10 text-brand" />,
-    sub: ['sensors', 'plcs'],
-  },
-  biomedical: {
-    title: 'Biomedical',
-    description: 'Intersection of medicine and engineering, including medical devices.',
-    icon: <HeartPulse className="h-10 w-10 text-brand" />,
-    sub: [],
-  },
   ideas: {
     title: 'Project Ideas',
     description: 'Inspiration for your next build, categorized by domain and difficulty level.',

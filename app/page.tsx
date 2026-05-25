@@ -9,11 +9,11 @@ export default function Home() {
       {/* Hero Section */}
       <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 text-center">
         <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-6 text-white max-w-4xl mx-auto">
-          The Ultimate Hub for <br className="hidden md:block"/> 
-          <span className="text-brand">Engineering Innovation</span>
+          Welcome to <br className="hidden md:block"/> 
+          <span className="text-brand">Electronics Gyan</span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-2xl mx-auto">
-          Deep-dive tutorials, comprehensive project BOMs, and specialized resources for Electronics, Mechanical, and Software engineers.
+        <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto leading-relaxed">
+          Your ultimate destination to learn, build, and innovate. We share comprehensive engineering projects, complete with Bill of Materials (BOMs), circuit schematics, source code, and step-by-step tutorials to help you turn ideas into reality.
         </p>
 
         {/* Global Search Bar */}
@@ -24,7 +24,7 @@ export default function Home() {
           <input
             type="text"
             className="block w-full pl-11 pr-4 py-4 bg-panel border-2 border-panel-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-lg"
-            placeholder="Search projects, tutorials, or components..."
+            placeholder="Search electronics projects, tutorials, or components..."
           />
           <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
             <button className="bg-brand hover:bg-brand-light text-white px-4 py-2 rounded-lg font-medium transition-colors">
@@ -34,37 +34,43 @@ export default function Home() {
         </div>
       </section>
 
-      {/* Featured Categories */}
+      {/* What We Do Section */}
       <section className="w-full bg-panel py-20 border-t border-b border-panel-border">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="text-center mb-16">
+            <h2 className="text-3xl font-bold font-heading text-white mb-4">What We Do</h2>
+            <p className="text-gray-400 max-w-3xl mx-auto text-lg">
+              At Electronics Gyan, we are passionate about bridging the gap between theoretical knowledge and practical engineering. We provide open-source resources, project ideas, and detailed guides for creators and makers around the world.
+            </p>
+          </div>
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
             
             <CategoryCard 
               title="Electronics & IoT"
               description="Microcontrollers, sensor interfacing, and end-to-end IoT devices."
               icon={<Cpu className="h-8 w-8 text-brand" />}
-              href="/electronics"
+              href="/projects#electronics"
             />
             
             <CategoryCard 
               title="Embedded Systems"
               description="Deep dive into RTOS, ARM Cortex, and bare-metal programming."
               icon={<Microchip className="h-8 w-8 text-brand" />}
-              href="/electronics/embedded"
+              href="/projects#electronics"
             />
             
             <CategoryCard 
               title="Software & Cloud"
               description="Backend frameworks, scalable cloud deployment, and API design."
               icon={<Code2 className="h-8 w-8 text-brand" />}
-              href="/software"
+              href="/projects#software"
             />
 
             <CategoryCard 
               title="Mechanical & CAD"
               description="3D modeling, structural analysis, and robotics design."
               icon={<PenTool className="h-8 w-8 text-brand" />}
-              href="/mechanical"
+              href="/projects#mechanical"
             />
 
           </div>

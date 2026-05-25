@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { Cpu, PenTool, Activity, HeartPulse, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
+import { electronicsProjectsList } from '@/lib/electronicsProjects';
 
 const projectCategories = [
   {
@@ -64,7 +65,7 @@ export default function ProjectsPage() {
       </div>
 
       {projectCategories.map((category, idx) => (
-        <section key={idx} className="mb-20">
+        <section key={idx} id={category.title.split(' ')[0].toLowerCase()} className="mb-20 scroll-mt-24">
           <div className="flex justify-between items-end mb-8 border-b border-panel-border pb-4">
             <div className="flex items-center gap-4">
               <div className="p-3 bg-panel rounded-xl border border-panel-border">
@@ -75,36 +76,38 @@ export default function ProjectsPage() {
                 <p className="text-gray-400 mt-1">{category.description}</p>
               </div>
             </div>
-            <Link href={category.href} className="hidden sm:flex items-center text-brand font-medium hover:text-brand-light transition-colors mb-2">
-              View All <ArrowRight className="h-4 w-4 ml-1" />
-            </Link>
           </div>
 
-          <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
-            {category.projects.map((project, pIdx) => (
-              <div key={pIdx} className="flex flex-col bg-panel border border-panel-border rounded-2xl overflow-hidden hover:border-gray-600 transition-colors cursor-pointer group">
-                <div className="relative h-48 w-full overflow-hidden">
-                  <Image src={project.image} alt={project.name} fill className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
-                  <div className="absolute top-4 left-4">
-                    <span className="px-3 py-1 bg-black/60 backdrop-blur-sm text-xs font-medium text-white rounded-full border border-white/10">
-                      {category.title.split(' ')[0]}
-                    </span>
+          {category.title === 'Electronics Projects' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {electronicsProjectsList.map((projectName, pIdx) => (
+                <div key={pIdx} className="p-4 bg-panel border border-panel-border rounded-xl hover:border-gray-600 transition-colors cursor-pointer group flex items-start gap-3">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-brand shrink-0"></div>
+                  <span className="font-bold text-white group-hover:text-brand transition-colors">{projectName}</span>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+              {category.projects.map((project, pIdx) => (
+                <div key={pIdx} className="flex flex-col bg-panel border border-panel-border rounded-2xl overflow-hidden hover:border-gray-600 transition-colors cursor-pointer group">
+                  <div className="relative h-48 w-full overflow-hidden">
+                    <Image src={project.image} alt={project.name} fill className="object-cover w-full h-full group-hover:scale-105 transition-transform duration-500" referrerPolicy="no-referrer" />
+                    <div className="absolute top-4 left-4">
+                      <span className="px-3 py-1 bg-black/60 backdrop-blur-sm text-xs font-medium text-white rounded-full border border-white/10">
+                        {category.title.split(' ')[0]}
+                      </span>
+                    </div>
+                  </div>
+                  <div className="p-6">
+                    <p className="text-xs text-gray-500 mb-2">{project.date}</p>
+                    <h3 className="text-xl font-bold text-white mb-2 group-hover:text-brand transition-colors line-clamp-2">{project.name}</h3>
+                    <p className="text-sm text-gray-400">View complete BOM, circuit schematics, and source code for this project.</p>
                   </div>
                 </div>
-                <div className="p-6">
-                  <p className="text-xs text-gray-500 mb-2">{project.date}</p>
-                  <h3 className="text-xl font-bold text-white mb-2 group-hover:text-brand transition-colors line-clamp-2">{project.name}</h3>
-                  <p className="text-sm text-gray-400">View complete BOM, circuit schematics, and source code for this project.</p>
-                </div>
-              </div>
-            ))}
-          </div>
-          
-          <div className="mt-6 sm:hidden">
-            <Link href={category.href} className="flex items-center justify-center w-full py-3 bg-panel border border-panel-border rounded-xl text-brand font-medium hover:bg-background transition-colors">
-              View All {category.title} <ArrowRight className="h-4 w-4 ml-2" />
-            </Link>
-          </div>
+              ))}
+            </div>
+          )}
         </section>
       ))}
 

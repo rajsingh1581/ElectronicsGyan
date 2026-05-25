@@ -2,55 +2,23 @@
 
 import { useState } from 'react';
 import Link from 'next/link';
-import { Menu, X, ChevronDown, Cpu, Code, PenTool, Activity, HeartPulse, Lightbulb, Mail, Handshake } from 'lucide-react';
+import Image from 'next/image';
+import { Menu, X, ChevronDown, Cpu, Lightbulb, Mail, Handshake } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
 // Navigation Data
 const navItems = [
   {
-    label: 'Electronics Projects',
-    href: '/electronics',
+    label: 'Projects',
+    href: '/projects',
     icon: Cpu,
     highlight: true,
     subItems: [
-      { label: 'Embedded Systems', href: '/electronics/embedded' },
-      { label: 'IoT', href: '/electronics/iot' },
-      { label: 'Robotics', href: '/electronics/robotics' },
-      { label: 'Analog Circuits', href: '/electronics/analog' },
+      { label: 'Electronics', href: '/projects#electronics' },
+      { label: 'Mechanical', href: '/projects#mechanical' },
+      { label: 'Instrumentation', href: '/projects#instrumentation' },
+      { label: 'Biomedical', href: '/projects#biomedical' },
     ],
-  },
-  {
-    label: 'Software',
-    href: '/software',
-    icon: Code,
-    subItems: [
-      { label: 'Python', href: '/software/python' },
-      { label: 'C/C++', href: '/software/c-cpp' },
-      { label: 'Web Dev', href: '/software/web' },
-    ],
-  },
-  {
-    label: 'Mechanical',
-    href: '/mechanical',
-    icon: PenTool,
-    subItems: [
-      { label: 'CAD Designs', href: '/mechanical/cad' },
-      { label: 'Automation', href: '/mechanical/automation' },
-    ],
-  },
-  {
-    label: 'Instrumentation',
-    href: '/instrumentation',
-    icon: Activity,
-    subItems: [
-      { label: 'Sensors', href: '/instrumentation/sensors' },
-      { label: 'PLCs', href: '/instrumentation/plcs' },
-    ],
-  },
-  {
-    label: 'Biomedical',
-    href: '/biomedical',
-    icon: HeartPulse,
   },
   {
     label: 'Ideas',
@@ -71,7 +39,7 @@ const navItems = [
     icon: Mail,
   },
   {
-    label: 'Partner',
+    label: 'Partner with us',
     href: '/partner',
     icon: Handshake,
   },
