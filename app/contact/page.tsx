@@ -1,7 +1,38 @@
+'use client';
+
+import { useState } from 'react';
 import { Mail, Phone, MapPin, Send } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ContactPage() {
+  const [formData, setFormData] = useState({
+    firstName: '',
+    lastName: '',
+    email: '',
+    subject: 'general',
+    project: '',
+    stream: 'electronics',
+    message: ''
+  });
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const subject = encodeURIComponent(`Contact Inquiry [${formData.subject.toUpperCase()}]: ${formData.firstName} ${formData.lastName}`);
+    const body = encodeURIComponent(`
+Name: ${formData.firstName} ${formData.lastName}
+Email: ${formData.email}
+Engineering Stream: ${formData.stream}
+Project: ${formData.project}
+Subject Focus: ${formData.subject}
+
+Message:
+${formData.message}
+    `);
+    
+    window.location.href = `mailto:infoelectronics.gyan@gmail.com?subject=${subject}&body=${body}`;
+  };
+
   return (
     <div className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16">
       
@@ -11,7 +42,7 @@ export default function ContactPage() {
           <Mail className="h-12 w-12 text-brand" />
         </div>
         <h1 className="text-4xl md:text-6xl font-extrabold font-heading text-white mb-6">
-          Get in <span className="text-brand">Touch</span>
+          Get in <span className="text-brand">Touch for Project Idea</span>
         </h1>
         <p className="text-lg text-gray-400 max-w-2xl">
           Whether you have a question about our engineering components, need support with a project, or want to discuss a partnership, we&apos;re here to help.
@@ -55,6 +86,7 @@ export default function ContactPage() {
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-brand hover:text-brand-light font-medium text-sm inline-flex items-center transition-colors"
+                id="view-on-google-maps"
               >
                 View on Google Maps &rarr;
               </a>
@@ -68,7 +100,7 @@ export default function ContactPage() {
             <div>
               <h3 className="text-lg font-bold text-white mb-1">Phone</h3>
               <p className="text-gray-400">+91-9799582552</p>
-              <p className="text-sm text-gray-500 mt-1">Available Mon-Fri, 9am - 6pm IST</p>
+              <p className="text-sm text-gray-500 mt-1">Available Mon-Sat, 9am - 6pm IST</p>
             </div>
           </div>
 
@@ -84,9 +116,9 @@ export default function ContactPage() {
         </div>
 
         {/* Contact Form */}
-        <div className="bg-panel border border-panel-border rounded-3xl p-8">
+        <div className="bg-panel border border-panel-border rounded-3xl p-8" id="contact-form-container">
           <h2 className="text-2xl font-bold text-white font-heading mb-6">Send us a Message</h2>
-          <form action="mailto:infoelectronics.gyan@gmail.com" method="post" encType="text/plain" className="space-y-6">
+          <form onSubmit={handleSubmit} className="space-y-6" id="contact-form-element">
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               <div className="space-y-2">
                 <label htmlFor="firstName" className="text-sm font-medium text-gray-300">First Name</label>
@@ -96,6 +128,9 @@ export default function ContactPage() {
                   name="firstName"
                   className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                   placeholder="John"
+                  value={formData.firstName}
+                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  required
                 />
               </div>
               <div className="space-y-2">
@@ -106,6 +141,9 @@ export default function ContactPage() {
                   name="lastName"
                   className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                   placeholder="Doe"
+                  value={formData.lastName}
+                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  required
                 />
               </div>
             </div>
@@ -118,7 +156,40 @@ export default function ContactPage() {
                 name="email"
                 className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
                 placeholder="john@example.com"
+                value={formData.email}
+                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                required
               />
+            </div>
+
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="project" className="text-sm font-medium text-gray-300">Project</label>
+                <input 
+                  type="text" 
+                  id="project" 
+                  name="project"
+                  className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
+                  placeholder="e.g. Smart IoT Weather System"
+                  value={formData.project}
+                  onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                />
+              </div>
+              <div className="space-y-2">
+                <label htmlFor="stream" className="text-sm font-medium text-gray-300">Engineering Stream</label>
+                <select 
+                  id="stream" 
+                  name="stream"
+                  className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all appearance-none"
+                  value={formData.stream}
+                  onChange={(e) => setFormData({ ...formData, stream: e.target.value })}
+                >
+                  <option value="electronics">Electronics</option>
+                  <option value="mechanical">Mechanical</option>
+                  <option value="software">Software</option>
+                  <option value="instrumentation">Instrumentation</option>
+                </select>
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -127,6 +198,8 @@ export default function ContactPage() {
                 id="subject" 
                 name="subject"
                 className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all appearance-none"
+                value={formData.subject}
+                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
               >
                 <option value="general">General Inquiry</option>
                 <option value="project">Project Support</option>
@@ -143,15 +216,19 @@ export default function ContactPage() {
                 rows={5}
                 className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all resize-y"
                 placeholder="How can we help you?"
+                value={formData.message}
+                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                required
               ></textarea>
             </div>
 
             <button 
               type="submit" 
-              className="w-full flex items-center justify-center bg-brand text-white font-medium py-4 rounded-lg hover:bg-brand-light transition-colors"
+              className="w-full flex items-center justify-center bg-brand text-white font-medium py-4 rounded-lg hover:bg-brand-light transition-colors cursor-pointer"
+              id="contact-form-submit-btn"
             >
               <Send className="w-5 h-5 mr-2" />
-              Send Message
+              Send Inquiry
             </button>
           </form>
         </div>

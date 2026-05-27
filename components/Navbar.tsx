@@ -17,7 +17,7 @@ const navItems = [
       { label: 'Electronics', href: '/projects#electronics' },
       { label: 'Mechanical', href: '/projects#mechanical' },
       { label: 'Instrumentation', href: '/projects#instrumentation' },
-      { label: 'Biomedical', href: '/projects#biomedical' },
+      { label: 'Software', href: '/projects#software' },
     ],
   },
   {

@@ -1,7 +1,10 @@
 import Link from 'next/link';
-import { Cpu, PenTool, Activity, HeartPulse, ArrowRight } from 'lucide-react';
+import { Cpu, PenTool, Activity, Terminal, ArrowRight } from 'lucide-react';
 import Image from 'next/image';
 import { electronicsProjectsList } from '@/lib/electronicsProjects';
+import { mechanicalProjectsList } from '@/lib/mechanicalProjects';
+import { softwareProjectsList } from '@/lib/softwareProjects';
+import { instrumentationProjectsList } from '@/lib/instrumentationProjects';
 
 const projectCategories = [
   {
@@ -31,22 +34,14 @@ const projectCategories = [
     description: 'Industrial automation, sensor interfacing, and PLC communication networks.',
     icon: <Activity className="h-8 w-8 text-brand" />,
     href: '/instrumentation',
-    projects: [
-      { name: 'Advanced PLC Based Sorting', date: 'Aug 22, 2026', image: 'https://picsum.photos/seed/inst1/600/400' },
-      { name: 'Wireless Industrial Sensor Network', date: 'Aug 10, 2026', image: 'https://picsum.photos/seed/inst2/600/400' },
-      { name: 'SCADA System for Water Management', date: 'Jul 28, 2026', image: 'https://picsum.photos/seed/inst3/600/400' },
-    ]
+    projects: []
   },
   {
-    title: 'Biomedical Projects',
-    description: 'Medical devices, biosignals processing, and healthcare monitoring systems.',
-    icon: <HeartPulse className="h-8 w-8 text-brand" />,
-    href: '/biomedical',
-    projects: [
-      { name: 'Non-Invasive Glucometer AI', date: 'Jul 15, 2026', image: 'https://picsum.photos/seed/bio1/600/400' },
-      { name: 'Wearable ECG Monitor Interface', date: 'Jul 02, 2026', image: 'https://picsum.photos/seed/bio2/600/400' },
-      { name: 'Robotic Exoskeleton for Rehab', date: 'Jun 20, 2026', image: 'https://picsum.photos/seed/bio3/600/400' },
-    ]
+    title: 'Software Projects',
+    description: 'Distributed systems, full-stack web platforms, and AI integrations.',
+    icon: <Terminal className="h-8 w-8 text-brand" />,
+    href: '/software',
+    projects: []
   }
 ];
 
@@ -87,6 +82,33 @@ export default function ProjectsPage() {
                 </div>
               ))}
             </div>
+          ) : category.title === 'Mechanical Projects' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {mechanicalProjectsList.map((projectName, pIdx) => (
+                <div key={pIdx} className="p-4 bg-panel border border-panel-border rounded-xl hover:border-gray-600 transition-colors cursor-pointer group flex items-start gap-3">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-brand shrink-0"></div>
+                  <span className="font-bold text-white group-hover:text-brand transition-colors">{projectName}</span>
+                </div>
+              ))}
+            </div>
+          ) : category.title === 'Instrumentation Projects' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {instrumentationProjectsList.map((projectName, pIdx) => (
+                <div key={pIdx} className="p-4 bg-panel border border-panel-border rounded-xl hover:border-gray-600 transition-colors cursor-pointer group flex items-start gap-3">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-brand shrink-0"></div>
+                  <span className="font-bold text-white group-hover:text-brand transition-colors">{projectName}</span>
+                </div>
+              ))}
+            </div>
+          ) : category.title === 'Software Projects' ? (
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+              {softwareProjectsList.map((projectName, pIdx) => (
+                <div key={pIdx} className="p-4 bg-panel border border-panel-border rounded-xl hover:border-gray-600 transition-colors cursor-pointer group flex items-start gap-3">
+                  <div className="w-2 h-2 mt-2 rounded-full bg-brand shrink-0"></div>
+                  <span className="font-bold text-white group-hover:text-brand transition-colors">{projectName}</span>
+                </div>
+              ))}
+            </div>
           ) : (
             <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
               {category.projects.map((project, pIdx) => (
@@ -108,8 +130,33 @@ export default function ProjectsPage() {
               ))}
             </div>
           )}
+
+          <div className="mt-8 flex justify-center">
+            <Link 
+              href="/contact" 
+              className="inline-flex items-center gap-2 px-8 py-3.5 bg-pink-700 hover:bg-pink-800 active:bg-pink-900 text-white font-bold tracking-wide rounded-xl shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 cursor-pointer text-center"
+              id={`submit-requirements-${category.title.toLowerCase().replace(/\s+/g, '-')}`}
+            >
+              Submit Requirements
+            </Link>
+          </div>
         </section>
       ))}
+
+      {/* Floating Submit Requirements Button that moves/sticks with scroll */}
+      <div className="fixed bottom-6 right-6 md:bottom-8 md:right-8 z-50">
+        <Link
+          href="/contact"
+          className="flex items-center gap-2.5 px-6 py-4 bg-pink-700 hover:bg-pink-800 active:bg-pink-900 text-white font-bold tracking-wide rounded-full shadow-2xl transition-all duration-300 transform hover:-translate-y-1 hover:scale-105 cursor-pointer max-w-xs text-center border border-white/20"
+          id="floating-submit-requirements"
+        >
+          <span className="relative flex h-3 w-3">
+            <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-white opacity-75"></span>
+            <span className="relative inline-flex rounded-full h-3 w-3 bg-white"></span>
+          </span>
+          Submit Requirements
+        </Link>
+      </div>
 
     </div>
   );
