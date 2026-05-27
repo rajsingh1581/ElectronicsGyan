@@ -3,12 +3,18 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, ChevronDown, Cpu, Lightbulb, Mail, Handshake } from 'lucide-react';
+import { Menu, X, ChevronDown, Cpu, Lightbulb, Mail, Handshake, Home, LogOut, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '@/components/Logo';
+import { useAuth } from '@/lib/AuthContext';
 
 // Navigation Data
 const navItems = [
+  {
+    label: 'Home',
+    href: '/',
+    icon: Home,
+  },
   {
     label: 'Projects',
     href: '/projects',
@@ -49,6 +55,7 @@ const navItems = [
 export default function Navbar() {
   const [isOpen, setIsOpen] = useState(false);
   const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
+  const { user, signout } = useAuth();
 
   const toggleDropdown = (label: string) => {
     setActiveDropdown(activeDropdown === label ? null : label);
@@ -121,9 +128,27 @@ export default function Navbar() {
 
           {/* Quick Actions & Mobile menu button */}
           <div className="flex items-center gap-4">
-            <button className="hidden sm:block text-sm font-medium text-white bg-panel hover:bg-panel-border border border-panel-border px-4 py-2 rounded-md transition-colors">
-              Sign In
-            </button>
+            {user ? (
+              <div className="hidden sm:flex items-center gap-3">
+                <div className="flex items-center gap-2 px-3 py-1.5 bg-brand/10 border border-brand/30 rounded-lg">
+                  <UserIcon className="h-4 w-4 text-brand" />
+                  <span className="text-sm font-semibold text-white tracking-wide">{user.name || user.username}</span>
+                </div>
+                <button
+                  onClick={signout}
+                  title="Sign Out"
+                  className="p-2 text-gray-400 hover:text-pink-500 rounded-lg hover:bg-panel transition-colors cursor-pointer"
+                >
+                  <LogOut className="h-4 w-4" />
+                </button>
+              </div>
+            ) : (
+              <Link href="/signin">
+                <button className="hidden sm:block text-sm font-medium text-white bg-panel hover:bg-panel-border border border-panel-border px-4 py-2 rounded-md transition-colors cursor-pointer">
+                  Sign In
+                </button>
+              </Link>
+            )}
             <div className="xl:hidden">
               <button
                 onClick={() => setIsOpen(!isOpen)}
@@ -205,9 +230,30 @@ export default function Navbar() {
                 </div>
               ))}
               <div className="mt-4 px-3 pt-4 border-t border-panel-border sm:hidden">
-                <button className="w-full text-sm font-medium text-white bg-panel-border hover:bg-gray-600 px-4 py-3 rounded-md transition-colors">
-                  Sign In
-                </button>
+                {user ? (
+                  <div className="space-y-3">
+                    <div className="flex items-center gap-3 px-4 py-3 bg-brand/10 border border-brand/30 rounded-md">
+                      <UserIcon className="h-5 w-5 text-brand" />
+                      <span className="text-yellow-100 font-bold text-sm">{user.name || user.username}</span>
+                    </div>
+                    <button
+                      onClick={() => {
+                        signout();
+                        setIsOpen(false);
+                      }}
+                      className="w-full flex items-center justify-center gap-2 text-sm font-bold text-white bg-pink-700 hover:bg-pink-800 px-4 py-3 rounded-md transition-colors cursor-pointer"
+                    >
+                      <LogOut className="h-4 w-4" />
+                      Sign Out
+                    </button>
+                  </div>
+                ) : (
+                  <Link href="/signin" onClick={() => setIsOpen(false)}>
+                    <button className="w-full text-sm font-bold text-white bg-brand hover:bg-brand-light px-4 py-3 rounded-md transition-colors cursor-pointer">
+                      Sign In
+                    </button>
+                  </Link>
+                )}
               </div>
             </div>
           </motion.div>

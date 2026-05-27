@@ -67,11 +67,11 @@ ${formData.message}
             <div className="w-full">
               <h3 className="text-lg font-bold text-white mb-1">Our Location</h3>
               <p className="text-gray-400 leading-relaxed mb-3">
-                18/25, shree colony jogiyon ki dhani, super market jaisingh pura khor jaipur - 302027 (India)
+                Krishna Bhavan, 18/25, shree colony jogiyon ki dhani, super market jaisingh pura khor jaipur - 302027 (India)
               </p>
               <div className="relative w-full h-48 rounded-xl overflow-hidden border border-panel-border mb-3">
                 <iframe 
-                  src="https://maps.google.com/maps?q=18/25,+shree+colony+jogiyon+ki+dhani,+super+market+jaisingh+pura+khor+jaipur&t=&z=13&ie=UTF8&iwloc=&output=embed"
+                  src="https://maps.google.com/maps?q=Krishna+Bhavan,+18/25,+shree+colony+jogiyon+ki+dhani,+super+market+jaisingh+pura+khor+jaipur+-+302027+(India)&t=&z=16&ie=UTF8&iwloc=&output=embed"
                   width="100%" 
                   height="100%" 
                   style={{ border: 0 }} 
@@ -82,7 +82,7 @@ ${formData.message}
                 ></iframe>
               </div>
               <a 
-                href="https://maps.app.goo.gl/woenAefqsbFuWVsX7" 
+                href="https://maps.app.goo.gl/JoZMKiT2UCPHVCFG9" 
                 target="_blank" 
                 rel="noopener noreferrer"
                 className="text-brand hover:text-brand-light font-medium text-sm inline-flex items-center transition-colors"
