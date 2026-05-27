@@ -5,6 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { Menu, X, ChevronDown, Cpu, Lightbulb, Mail, Handshake } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import Logo from '@/components/Logo';
 
 // Navigation Data
 const navItems = [
@@ -60,13 +61,8 @@ export default function Navbar() {
           
           {/* Logo */}
           <div className="flex-shrink-0 flex items-center">
-            <Link href="/" className="flex items-center gap-2 group">
-              <div className="w-8 h-8 rounded-lg bg-brand flex items-center justify-center text-white font-bold font-heading text-lg group-hover:bg-brand-light transition-colors">
-                EG
-              </div>
-              <span className="font-heading font-bold text-xl tracking-tight text-white hidden sm:block">
-                Electronics <span className="text-brand">Gyan</span>
-              </span>
+            <Link href="/" className="flex items-center group">
+              <Logo layout="horizontal" />
             </Link>
           </div>
 

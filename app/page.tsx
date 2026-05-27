@@ -1,14 +1,16 @@
 import Image from 'next/image';
 import Link from 'next/link';
 import { Search, ArrowRight, Microchip, Cpu, Code2, PenTool } from 'lucide-react';
+import Logo from '@/components/Logo';
 
 export default function Home() {
   return (
     <div className="flex flex-col items-center">
       
       {/* Hero Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-20 lg:py-32 text-center">
-        <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-6 text-white max-w-4xl mx-auto">
+      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center flex flex-col items-center">
+        <Logo layout="vertical" size="xl" className="mb-8" />
+        <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-6 text-white max-w-4xl mx-auto leading-tight">
           Welcome to <br className="hidden md:block"/> 
           <span className="text-brand">Electronics Gyan</span>
         </h1>
