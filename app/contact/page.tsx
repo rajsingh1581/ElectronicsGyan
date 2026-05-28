@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send } from 'lucide-react';
+import { Mail, MapPin, Send, MessageCircle } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ContactPage() {
@@ -95,12 +95,21 @@ ${formData.message}
 
           <div className="flex items-start">
             <div className="p-3 bg-panel border border-panel-border rounded-xl mr-4 shrink-0">
-              <Phone className="h-6 w-6 text-brand" />
+              <MessageCircle className="h-6 w-6 text-[#25D366]" />
             </div>
             <div>
-              <h3 className="text-lg font-bold text-white mb-1">Phone</h3>
-              <p className="text-gray-400">+91-9799582552</p>
-              <p className="text-sm text-gray-500 mt-1">Available Mon-Sat, 9am - 6pm IST</p>
+              <h3 className="text-lg font-bold text-white mb-1">WhatsApp</h3>
+              <p className="text-gray-400">
+                <a 
+                  href="https://wa.me/919799582552" 
+                  target="_blank" 
+                  rel="noopener noreferrer"
+                  className="hover:text-brand transition-colors font-medium decoration-brand inline-flex items-center"
+                >
+                  Chat with us &rarr;
+                </a>
+              </p>
+              <p className="text-sm text-gray-500 mt-1">Chat with our engineering team instantly</p>
             </div>
           </div>
 

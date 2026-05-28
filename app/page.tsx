@@ -2,6 +2,7 @@ import Image from 'next/image';
 import Link from 'next/link';
 import { Search, ArrowRight, Microchip, Cpu, Code2, PenTool } from 'lucide-react';
 import Logo from '@/components/Logo';
+import AiChatBot from '@/components/AiChatBot';
 
 export default function Home() {
   return (
@@ -110,6 +111,7 @@ export default function Home() {
           />
         </div>
       </section>
+      <AiChatBot />
     </div>
   );
 }
