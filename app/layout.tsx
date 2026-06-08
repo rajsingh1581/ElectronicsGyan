@@ -30,6 +30,11 @@ export default function RootLayout({children}: {children: React.ReactNode}) {
           <main className="flex-1">
             {children}
           </main>
+          <footer className="w-full bg-panel py-8 border-t border-panel-border mt-auto">
+            <div className="max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 text-center text-sm text-gray-500">
+              Copyright © {new Date().getFullYear()} Nandini Enterprises. All rights reserved.
+            </div>
+          </footer>
         </AuthProvider>
       </body>
     </html>

@@ -3,34 +3,40 @@ import Link from 'next/link';
 import { Search, ArrowRight, Microchip, Cpu, Code2, PenTool } from 'lucide-react';
 import Logo from '@/components/Logo';
 import AiChatBot from '@/components/AiChatBot';
+import ProjectSlideshow from '@/components/ProjectSlideshow';
 
 export default function Home() {
   return (
     <div className="flex flex-col items-center">
       
+      {/* Slideshow Top Section */}
+      <div className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 pt-6 sm:pt-8 lg:pt-12">
+        <ProjectSlideshow />
+      </div>
+
       {/* Hero Section */}
-      <section className="w-full max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-16 lg:py-24 text-center flex flex-col items-center">
-        <Logo layout="vertical" size="xl" className="mb-8" />
-        <h1 className="text-4xl md:text-6xl font-extrabold font-heading tracking-tight mb-6 text-white max-w-4xl mx-auto leading-tight">
+      <section className="w-full max-w-[1400px] mx-auto px-4 sm:px-6 lg:px-8 py-10 lg:py-16 text-center flex flex-col items-center">
+        <Logo layout="vertical" size="xl" className="mb-6 lg:mb-8" />
+        <h1 className="text-4xl md:text-6xl lg:text-7xl font-extrabold font-heading tracking-tight mb-6 text-white max-w-5xl mx-auto leading-tight">
           Welcome to <br className="hidden md:block"/> 
           <span className="text-brand">Electronics Gyan</span>
         </h1>
-        <p className="text-lg md:text-xl text-gray-400 mb-10 max-w-3xl mx-auto leading-relaxed">
+        <p className="text-base md:text-lg lg:text-xl text-gray-400 mb-8 lg:mb-10 max-w-3xl mx-auto leading-relaxed px-2">
           Your ultimate destination to learn, build, and innovate. We share comprehensive engineering projects, complete with Bill of Materials (BOMs), circuit schematics, source code, and step-by-step tutorials to help you turn ideas into reality.
         </p>
 
         {/* Global Search Bar */}
-        <div className="max-w-2xl mx-auto relative group">
+        <div className="w-full max-w-2xl mx-auto relative group mb-12">
           <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
             <Search className="h-5 w-5 text-gray-400 group-focus-within:text-brand transition-colors" />
           </div>
           <input
             type="text"
-            className="block w-full pl-11 pr-4 py-4 bg-panel border-2 border-panel-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-lg"
+            className="block w-full pl-11 pr-4 py-3 sm:py-4 bg-panel border-2 border-panel-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-lg text-sm sm:text-base"
             placeholder="Search electronics projects, tutorials, or components..."
           />
           <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
-            <button className="bg-brand hover:bg-brand-light text-white px-4 py-2 rounded-lg font-medium transition-colors">
+            <button className="bg-brand hover:bg-brand-light text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-colors text-sm sm:text-base">
               Search
             </button>
           </div>

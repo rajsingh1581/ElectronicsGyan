@@ -248,7 +248,7 @@ export default function AiChatBot() {
   return (
     <>
       {/* Floating Chat Bubble Button */}
-      <div className="fixed bottom-6 right-6 z-50">
+      <div className="fixed bottom-4 right-4 sm:bottom-6 sm:right-6 z-50">
         <button
           onClick={() => setIsOpen(!isOpen)}
           className={`relative group p-1 bg-slate-900 border border-panel-border text-white rounded-full shadow-2xl flex items-center justify-center transition-all duration-300 hover:scale-105 active:scale-95 cursor-pointer ${
@@ -278,7 +278,7 @@ export default function AiChatBot() {
             animate={{ opacity: 1, y: 0, scale: 1 }}
             exit={{ opacity: 0, y: 30, scale: 0.95 }}
             transition={{ duration: 0.2, ease: 'easeOut' }}
-            className="fixed bottom-24 right-6 w-[360px] sm:w-[400px] h-[550px] bg-panel border-2 border-panel-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden max-w-[calc(100vw-2rem)]"
+            className="fixed bottom-20 right-4 sm:bottom-24 sm:right-6 w-[calc(100vw-2rem)] sm:w-[400px] h-[calc(100svh-7rem)] sm:h-[550px] max-h-[800px] bg-panel border-2 border-panel-border rounded-2xl shadow-2xl z-50 flex flex-col overflow-hidden"
             id="ai-chatbot-window"
           >
             {/* Window Header */}
