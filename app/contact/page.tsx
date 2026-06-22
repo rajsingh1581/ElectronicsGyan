@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, MapPin, Send, MessageCircle } from 'lucide-react';
+import { Mail, MapPin, Send, MessageCircle, CheckCircle, Loader2 } from 'lucide-react';
 import Link from 'next/link';
 
 export default function ContactPage() {
@@ -15,22 +15,56 @@ export default function ContactPage() {
     message: ''
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    const subject = encodeURIComponent(`Contact Inquiry [${formData.subject.toUpperCase()}]: ${formData.firstName} ${formData.lastName}`);
-    const body = encodeURIComponent(`
-Name: ${formData.firstName} ${formData.lastName}
-Email: ${formData.email}
-Engineering Stream: ${formData.stream}
-Project: ${formData.project}
-Subject Focus: ${formData.subject}
+  const [isPending, setIsPending] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [smtpIssue, setSmtpIssue] = useState<string | null>(null);
 
-Message:
-${formData.message}
-    `);
-    
-    window.location.href = `mailto:infoelectronics.gyan@gmail.com?subject=${subject}&body=${body}`;
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsPending(true);
+    setError(null);
+    setSmtpIssue(null);
+
+    try {
+      const response = await fetch('/api/contact', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(formData),
+      });
+
+      const data = await response.json();
+
+      if (!response.ok) {
+        setError(data.error || 'Failed to submit message.');
+        if (data.meta && data.meta.smtpError) {
+          setSmtpIssue(data.meta.smtpError);
+        } else {
+          setSmtpIssue(data.error || 'SMTP delivery failed.');
+        }
+        return;
+      }
+
+      setSmtpIssue(null);
+      setSubmitted(true);
+      // Reset form fields
+      setFormData({
+        firstName: '',
+        lastName: '',
+        email: '',
+        subject: 'general',
+        project: '',
+        stream: 'electronics',
+        message: ''
+      });
+    } catch (err: any) {
+      console.error('Contact submit error:', err);
+      setError(err.message || 'An error occurred while transmitting your query.');
+    } finally {
+      setIsPending(false);
+    }
   };
 
   return (
@@ -126,120 +160,209 @@ ${formData.message}
 
         {/* Contact Form */}
         <div className="bg-panel border border-panel-border rounded-3xl p-8" id="contact-form-container">
-          <h2 className="text-2xl font-bold text-white font-heading mb-6">Send us a Message</h2>
-          <form onSubmit={handleSubmit} className="space-y-6" id="contact-form-element">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="firstName" className="text-sm font-medium text-gray-300">First Name</label>
-                <input 
-                  type="text" 
-                  id="firstName" 
-                  name="firstName"
-                  className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                  placeholder="John"
-                  value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                  required
-                />
+          {submitted ? (
+            <div className="flex flex-col items-center text-center py-12 px-4 animate-fade-in" id="contact-success-state">
+              <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
+                <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
-              <div className="space-y-2">
-                <label htmlFor="lastName" className="text-sm font-medium text-gray-300">Last Name</label>
-                <input 
-                  type="text" 
-                  id="lastName" 
-                  name="lastName"
-                  className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                  placeholder="Doe"
-                  value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                  required
-                />
-              </div>
-            </div>
+              <h2 className="text-3xl font-bold text-white font-heading mb-4">Message Sent!</h2>
+              <p className="text-gray-300 max-w-md leading-relaxed mb-6">
+                Thank you for reaching out. Your general inquiry has been composed and sent directly to <span className="text-brand font-semibold font-mono">infoelectronics.gyan@gmail.com</span> via secure transmission.
+              </p>
 
-            <div className="space-y-2">
-              <label htmlFor="email" className="text-sm font-medium text-gray-300">Email Address</label>
-              <input 
-                type="email" 
-                id="email" 
-                name="email"
-                className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                placeholder="john@example.com"
-                value={formData.email}
-                onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                required
-              />
-            </div>
+              {smtpIssue && (
+                <div className="mb-8 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 text-left max-w-lg text-sm text-amber-300 shadow-xl" id="smtp-alert-box">
+                  <div className="flex items-center gap-2 mb-3 text-amber-400">
+                    <span className="font-semibold text-base">⚠️ SMTP Delivery Warning:</span>
+                  </div>
+                  <p className="text-gray-300 mb-3">
+                    Direct forwarding to <span className="font-semibold text-white">infoelectronics.gyan@gmail.com</span> failed due to a Gmail authentication error:
+                  </p>
+                  <code className="block bg-black/40 p-3 rounded-lg text-xs font-mono text-red-400 select-all mb-4 overflow-x-auto whitespace-pre-wrap border border-red-500/10">
+                    {smtpIssue}
+                  </code>
+                  <p className="font-semibold text-white mb-2">How to fix this in your system environment:</p>
+                  <ol className="list-decimal list-inside space-y-2 text-gray-300 text-xs leading-relaxed">
+                    <li>Log in to your Google Account and navigate to <span className="font-semibold text-amber-200">Security</span>.</li>
+                    <li>Ensure <span className="font-semibold text-amber-200">2-Step Verification</span> is enabled.</li>
+                    <li>Search for or go to <span className="font-semibold text-amber-200">App Passwords</span>.</li>
+                    <li>Create a password for your app (name it <span className="italic">Electronics Gyan</span>).</li>
+                    <li>Copy the resulting <span className="font-semibold text-amber-200">16-character passkey</span> (no spaces).</li>
+                    <li>Go to your AI Studio project <span className="font-semibold text-emerald-400">Settings</span> menu and add or update your <code className="text-white bg-slate-800 px-1.5 py-0.5 rounded font-mono">GMAIL_PASS</code> secret with this passkey.</li>
+                  </ol>
+                </div>
+              )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2">
-                <label htmlFor="project" className="text-sm font-medium text-gray-300">Project</label>
-                <input 
-                  type="text" 
-                  id="project" 
-                  name="project"
-                  className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all"
-                  placeholder="e.g. Smart IoT Weather System"
-                  value={formData.project}
-                  onChange={(e) => setFormData({ ...formData, project: e.target.value })}
-                />
-              </div>
-              <div className="space-y-2">
-                <label htmlFor="stream" className="text-sm font-medium text-gray-300">Engineering Stream</label>
-                <select 
-                  id="stream" 
-                  name="stream"
-                  className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all appearance-none"
-                  value={formData.stream}
-                  onChange={(e) => setFormData({ ...formData, stream: e.target.value })}
-                >
-                  <option value="electronics">Electronics</option>
-                  <option value="mechanical">Mechanical</option>
-                  <option value="software">Software</option>
-                  <option value="instrumentation">Instrumentation</option>
-                </select>
-              </div>
-            </div>
-
-            <div className="space-y-2">
-              <label htmlFor="subject" className="text-sm font-medium text-gray-300">Subject</label>
-              <select 
-                id="subject" 
-                name="subject"
-                className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all appearance-none"
-                value={formData.subject}
-                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+              <button
+                onClick={() => setSubmitted(false)}
+                className="px-6 py-3 bg-brand/10 border border-brand/20 hover:bg-brand/20 text-brand rounded-xl font-medium transition-all cursor-pointer"
+                id="contact-reset-btn"
               >
-                <option value="general">General Inquiry</option>
-                <option value="project">Project Support</option>
-                <option value="partnership">Partnership / Advertising</option>
-                <option value="component">Component Availability</option>
-              </select>
+                Send Another Message
+              </button>
             </div>
+          ) : (
+            <>
+              <h2 className="text-2xl font-bold text-white font-heading mb-6">Send us a Message</h2>
+              {error && (
+                <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
+                  {error}
+                </div>
+              )}
+              {smtpIssue && (
+                <div className="mb-6 bg-amber-500/10 border border-amber-500/20 rounded-2xl p-6 text-left text-sm text-amber-300 shadow-xl" id="form-smtp-alert-box">
+                  <div className="flex items-center gap-2 mb-3 text-amber-400">
+                    <span className="font-semibold text-base">⚠️ SMTP Delivery Error:</span>
+                  </div>
+                  <p className="text-gray-300 mb-3 leading-relaxed">
+                    The contact form transmission failed because Google&apos;s mail server refused connection with the current credentials.
+                  </p>
+                  <code className="block bg-black/40 p-3 rounded-lg text-xs font-mono text-red-450 select-all mb-4 overflow-x-auto whitespace-pre-wrap border border-red-500/25">
+                    {smtpIssue}
+                  </code>
+                  <p className="font-semibold text-white mb-2 font-heading">How to authorize with Google Mail:</p>
+                  <ol className="list-decimal list-inside space-y-2 text-gray-300 text-xs leading-relaxed">
+                    <li>Go to your Google Account &raquo; <span className="font-semibold text-amber-200">Security</span>.</li>
+                    <li>Ensure <span className="font-semibold text-amber-200">2-Step Verification</span> is enabled.</li>
+                    <li>Search or navigate to <span className="font-semibold text-amber-200">App Passwords</span>.</li>
+                    <li>Generate a password for your app (name it <span className="italic">Electronics Gyan</span>).</li>
+                    <li>Copy the resulting <span className="font-semibold text-amber-200">16-character passkey</span> (no spaces).</li>
+                    <li>Open your AI Studio project <span className="font-semibold text-emerald-400">Settings</span> panel, find the secrets manager, and set <code className="text-white bg-slate-800 px-1.5 py-0.5 rounded font-mono">GMAIL_PASS</code> with this 16-digit passkey.</li>
+                  </ol>
+                </div>
+              )}
+              <form onSubmit={handleSubmit} className="space-y-6" id="contact-form-element">
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="firstName" className="text-sm font-medium text-gray-300">First Name</label>
+                    <input 
+                      type="text" 
+                      id="firstName" 
+                      name="firstName"
+                      className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all disabled:opacity-50"
+                      placeholder="John"
+                      value={formData.firstName}
+                      onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                      required
+                      disabled={isPending}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="lastName" className="text-sm font-medium text-gray-300">Last Name</label>
+                    <input 
+                      type="text" 
+                      id="lastName" 
+                      name="lastName"
+                      className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all disabled:opacity-50"
+                      placeholder="Doe"
+                      value={formData.lastName}
+                      onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                      required
+                      disabled={isPending}
+                    />
+                  </div>
+                </div>
 
-            <div className="space-y-2">
-              <label htmlFor="message" className="text-sm font-medium text-gray-300">Message</label>
-              <textarea 
-                id="message" 
-                name="message"
-                rows={5}
-                className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all resize-y"
-                placeholder="How can we help you?"
-                value={formData.message}
-                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
-                required
-              ></textarea>
-            </div>
+                <div className="space-y-2">
+                  <label htmlFor="email" className="text-sm font-medium text-gray-300">Email Address</label>
+                  <input 
+                    type="email" 
+                    id="email" 
+                    name="email"
+                    className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all disabled:opacity-50"
+                    placeholder="john@example.com"
+                    value={formData.email}
+                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                    required
+                    disabled={isPending}
+                  />
+                </div>
 
-            <button 
-              type="submit" 
-              className="w-full flex items-center justify-center bg-brand text-white font-medium py-4 rounded-lg hover:bg-brand-light transition-colors cursor-pointer"
-              id="contact-form-submit-btn"
-            >
-              <Send className="w-5 h-5 mr-2" />
-              Send Inquiry
-            </button>
-          </form>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="project" className="text-sm font-medium text-gray-300">Project</label>
+                    <input 
+                      type="text" 
+                      id="project" 
+                      name="project"
+                      className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all disabled:opacity-50"
+                      placeholder="e.g. Smart IoT Weather System"
+                      value={formData.project}
+                      onChange={(e) => setFormData({ ...formData, project: e.target.value })}
+                      disabled={isPending}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="stream" className="text-sm font-medium text-gray-300">Engineering Stream</label>
+                    <select 
+                      id="stream" 
+                      name="stream"
+                      className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all appearance-none disabled:opacity-50"
+                      value={formData.stream}
+                      onChange={(e) => setFormData({ ...formData, stream: e.target.value })}
+                      disabled={isPending}
+                    >
+                      <option value="electronics">Electronics</option>
+                      <option value="mechanical">Mechanical</option>
+                      <option value="software">Software</option>
+                      <option value="instrumentation">Instrumentation</option>
+                    </select>
+                  </div>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="subject" className="text-sm font-medium text-gray-300">Subject</label>
+                  <select 
+                    id="subject" 
+                    name="subject"
+                    className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all appearance-none disabled:opacity-50"
+                    value={formData.subject}
+                    onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                    disabled={isPending}
+                  >
+                    <option value="general">General Inquiry</option>
+                    <option value="project">Project Support</option>
+                    <option value="partnership">Partnership / Advertising</option>
+                    <option value="component">Component Availability</option>
+                  </select>
+                </div>
+
+                <div className="space-y-2">
+                  <label htmlFor="message" className="text-sm font-medium text-gray-300">Message</label>
+                  <textarea 
+                    id="message" 
+                    name="message"
+                    rows={5}
+                    className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all resize-y disabled:opacity-50"
+                    placeholder="How can we help you?"
+                    value={formData.message}
+                    onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                    required
+                    disabled={isPending}
+                  ></textarea>
+                </div>
+
+                <button 
+                  type="submit" 
+                  disabled={isPending}
+                  className="w-full flex items-center justify-center bg-brand text-white font-medium py-4 rounded-lg hover:bg-brand-light transition-colors cursor-pointer disabled:opacity-50 disabled:cursor-not-allowed"
+                  id="contact-form-submit-btn"
+                >
+                  {isPending ? (
+                    <>
+                      <Loader2 className="w-5 h-5 mr-3 animate-spin" />
+                      Saving & Sending...
+                    </>
+                  ) : (
+                    <>
+                      <Send className="w-5 h-5 mr-2" />
+                      Send Message
+                    </>
+                  )}
+                </button>
+              </form>
+            </>
+          )}
         </div>
 
       </div>
