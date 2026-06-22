@@ -1,14 +1,25 @@
 import { GoogleGenAI } from "@google/genai";
 import { NextRequest, NextResponse } from "next/server";
 
-const ai = new GoogleGenAI({
-  apiKey: process.env.GEMINI_API_KEY,
-  httpOptions: {
-    headers: {
-      'User-Agent': 'aistudio-build',
+let aiClient: GoogleGenAI | null = null;
+
+function getAiClient() {
+  if (!aiClient) {
+    const apiKey = process.env.GEMINI_API_KEY;
+    if (!apiKey) {
+      throw new Error("GEMINI_API_KEY environment variable is not configured.");
     }
+    aiClient = new GoogleGenAI({
+      apiKey,
+      httpOptions: {
+        headers: {
+          'User-Agent': 'aistudio-build',
+        }
+      }
+    });
   }
-});
+  return aiClient;
+}
 
 export async function POST(req: NextRequest) {
   try {
@@ -24,6 +35,7 @@ export async function POST(req: NextRequest) {
       parts: [{ text: m.content }]
     }));
 
+    const ai = getAiClient();
     const response = await ai.models.generateContent({
       model: "gemini-3.5-flash",
       contents: contents,
