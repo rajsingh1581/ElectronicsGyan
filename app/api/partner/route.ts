@@ -4,26 +4,24 @@ import nodemailer from "nodemailer";
 export async function POST(req: NextRequest) {
   try {
     const data = await req.json();
-    const { firstName, lastName, email, phone, subject, project, stream, message } = data;
+    const { name, email, phone, location, experience } = data;
 
-    if (!firstName || !lastName || !email || !message) {
+    if (!name || !email || !phone || !location || !experience) {
       return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
     }
 
     const timestamp = new Date().toISOString();
 
-    // Log the incoming message to the server logs
+    // Log the incoming partnership application to the server logs
     console.log("\n=============================================");
-    console.log("📨 NEW CONTACT FORM INCOMING 📨");
+    console.log("📨 NEW PARTNERSHIP APPLICATION INCOMING 📨");
     console.log("=============================================");
-    console.log(`From: ${firstName} ${lastName} <${email}>`);
-    console.log(`Phone: ${phone || "Not Provided"}`);
-    console.log(`Engineering Stream: ${stream}`);
-    console.log(`Project: ${project || "N/A"}`);
-    console.log(`Subject Focus: ${subject}`);
-    console.log(`Message Content:`);
+    console.log(`From: ${name} <${email}>`);
+    console.log(`Phone: ${phone}`);
+    console.log(`Location: ${location}`);
+    console.log(`Experience:`);
     console.log(`---------------------------------------------`);
-    console.log(message);
+    console.log(experience);
     console.log(`---------------------------------------------`);
 
     const smtpUser = process.env.GMAIL_USER;
@@ -54,22 +52,20 @@ export async function POST(req: NextRequest) {
       });
 
       const mailOptions = {
-        from: `"${firstName} ${lastName}" <${smtpUser}>`,
+        from: `"${name}" <${smtpUser}>`,
         to: "infoelectronics.gyan@gmail.com",
         replyTo: email,
-        subject: `Contact Inquiry [${subject.toUpperCase()}]: ${firstName} ${lastName}`,
+        subject: `Partnership Application: ${name}`,
         text: `
-You have received a new contact inquiry from the Electronics Gyan app!
+You have received a new Partnership Application from the Electronics Gyan app!
 
-Name: ${firstName} ${lastName}
+Name: ${name}
 Email: ${email}
-Phone: ${phone || "Not Provided"}
-Engineering Stream: ${stream}
-Project Name: ${project || "N/A"}
-Subject Focus: ${subject}
+Phone: ${phone}
+Location: ${location}
 
-Message:
-${message}
+Business Profile / Experience:
+${experience}
 
 ---------------------------------------
 Submitted At: ${timestamp}
@@ -77,7 +73,7 @@ Submitted At: ${timestamp}
       };
 
       await transporter.sendMail(mailOptions);
-      console.log("✅ Direct SMTP Email forwarded successfully to infoelectronics.gyan@gmail.com!");
+      console.log("✅ Direct SMTP Partnership Email forwarded successfully to infoelectronics.gyan@gmail.com!");
       emailSentSuccessfully = true;
     } catch (smtpError: any) {
       console.error("❌ SMTP forward delivery failed:", smtpError);
@@ -99,7 +95,7 @@ Submitted At: ${timestamp}
 
     return NextResponse.json({
       success: true,
-      message: "Message successfully transmitted directly via Gmail SMTP to infoelectronics.gyan@gmail.com.",
+      message: "Partnership application successfully transmitted directly via Gmail SMTP to infoelectronics.gyan@gmail.com.",
       meta: {
         emailSentReal: true,
         smtpError: null,
@@ -107,8 +103,7 @@ Submitted At: ${timestamp}
     });
 
   } catch (error: any) {
-    console.error("Contact Form API Endpoint Error:", error);
+    console.error("Partnership Form API Endpoint Error:", error);
     return NextResponse.json({ error: error.message || "Internal Server Error" }, { status: 500 });
   }
 }
-

@@ -9,6 +9,7 @@ export default function ContactPage() {
     firstName: '',
     lastName: '',
     email: '',
+    phone: '',
     subject: 'general',
     project: '',
     stream: 'electronics',
@@ -54,6 +55,7 @@ export default function ContactPage() {
         firstName: '',
         lastName: '',
         email: '',
+        phone: '',
         subject: 'general',
         project: '',
         stream: 'electronics',
@@ -165,9 +167,9 @@ export default function ContactPage() {
               <div className="p-4 bg-green-500/10 border border-green-500/20 rounded-full mb-6">
                 <CheckCircle className="h-16 w-16 text-green-500" />
               </div>
-              <h2 className="text-3xl font-bold text-white font-heading mb-4">Message Sent!</h2>
+              <h2 className="text-3xl font-bold text-white font-heading mb-4">Inquiry Submitted!</h2>
               <p className="text-gray-300 max-w-md leading-relaxed mb-6">
-                Thank you for reaching out. Your general inquiry has been composed and sent directly to <span className="text-brand font-semibold font-mono">infoelectronics.gyan@gmail.com</span> via secure transmission.
+                Thank you for reaching out! Your inquiry has been processed and transmitted directly to our specialist engineering team via secure transmission.
               </p>
 
               {smtpIssue && (
@@ -176,7 +178,7 @@ export default function ContactPage() {
                     <span className="font-semibold text-base">⚠️ SMTP Delivery Warning:</span>
                   </div>
                   <p className="text-gray-300 mb-3">
-                    Direct forwarding to <span className="font-semibold text-white">infoelectronics.gyan@gmail.com</span> failed due to a Gmail authentication error:
+                    Direct forwarding of your submission to our team failed due to a Gmail authentication error:
                   </p>
                   <code className="block bg-black/40 p-3 rounded-lg text-xs font-mono text-red-400 select-all mb-4 overflow-x-auto whitespace-pre-wrap border border-red-500/10">
                     {smtpIssue}
@@ -203,7 +205,7 @@ export default function ContactPage() {
             </div>
           ) : (
             <>
-              <h2 className="text-2xl font-bold text-white font-heading mb-6">Send us a Message</h2>
+              <h2 className="text-2xl font-bold text-white font-heading mb-6">Submit Enquiry</h2>
               {error && (
                 <div className="mb-6 p-4 bg-red-500/10 border border-red-500/20 rounded-xl text-red-400 text-sm">
                   {error}
@@ -263,19 +265,34 @@ export default function ContactPage() {
                   </div>
                 </div>
 
-                <div className="space-y-2">
-                  <label htmlFor="email" className="text-sm font-medium text-gray-300">Email Address</label>
-                  <input 
-                    type="email" 
-                    id="email" 
-                    name="email"
-                    className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all disabled:opacity-50"
-                    placeholder="john@example.com"
-                    value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    required
-                    disabled={isPending}
-                  />
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  <div className="space-y-2">
+                    <label htmlFor="email" className="text-sm font-medium text-gray-300">Email Address</label>
+                    <input 
+                      type="email" 
+                      id="email" 
+                      name="email"
+                      className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all disabled:opacity-50"
+                      placeholder="john@example.com"
+                      value={formData.email}
+                      onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                      required
+                      disabled={isPending}
+                    />
+                  </div>
+                  <div className="space-y-2">
+                    <label htmlFor="phone" className="text-sm font-medium text-gray-300">Phone Number</label>
+                    <input 
+                      type="tel" 
+                      id="phone" 
+                      name="phone"
+                      className="w-full bg-background border border-panel-border rounded-lg px-4 py-3 text-white focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all disabled:opacity-50"
+                      placeholder="e.g. +91 9799582552"
+                      value={formData.phone}
+                      onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
+                      disabled={isPending}
+                    />
+                  </div>
                 </div>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -351,12 +368,12 @@ export default function ContactPage() {
                   {isPending ? (
                     <>
                       <Loader2 className="w-5 h-5 mr-3 animate-spin" />
-                      Saving & Sending...
+                      Submitting...
                     </>
                   ) : (
                     <>
                       <Send className="w-5 h-5 mr-2" />
-                      Send Message
+                      Submit Enquiry
                     </>
                   )}
                 </button>
