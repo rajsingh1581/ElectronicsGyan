@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, ChevronDown, Cpu, Lightbulb, Mail, Handshake, Home, LogOut, User as UserIcon } from 'lucide-react';
+import { Menu, X, ChevronDown, Cpu, Lightbulb, BookOpen, Mail, Handshake, Home, LogOut, User as UserIcon } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '@/components/Logo';
 import { useAuth } from '@/lib/AuthContext';
@@ -25,6 +25,17 @@ const navItems = [
       { label: 'Mechanical', href: '/projects#mechanical' },
       { label: 'Instrumentation', href: '/projects#instrumentation' },
       { label: 'Software', href: '/projects#software' },
+    ],
+  },
+  {
+    label: 'Tutorial',
+    href: '/tutorial',
+    icon: BookOpen,
+    subItems: [
+      { label: 'RTOS', href: '/tutorial/rtos' },
+      { label: 'STM32', href: '/tutorial/stm32' },
+      { label: 'Arduino', href: '/tutorial/arduino' },
+      { label: 'Raspberry Pi', href: '/tutorial/raspberry-pi' },
     ],
   },
   {
