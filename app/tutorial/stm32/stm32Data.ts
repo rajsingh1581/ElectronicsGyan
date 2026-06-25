@@ -199,49 +199,219 @@ int main(void) {
   },
   {
     id: 'gpio_tutor',
-    name: 'GPIO Tutorial',
+    name: 'GPIO Configuration & Pin Multiplexing',
     category: 'gpio',
-    summary: 'Comprehensive guide to configuring MCU GPIO pins, slew rate speed, and push-pull configurations.',
-    theory: `### Detailed GPIO Architecture
-A single STM32 GPIO pin includes a complex array of hardware buffers, transistors, and internal resistors:
+    summary: 'Master low-level register-level GPIO configuration, Alternate Function multiplexing, and hardware speed tuning per RM0394.',
+    theory: `## GPIO Configuration & Pin Multiplexing & Architectural Foundation
 
-1. **Push-Pull Mode**: Activates both the PMOS (pull to VDD) and NMOS (pull to VSS) transistors. Used for active-high and active-low signals.
-2. **Open-Drain Mode**: Only the NMOS transistor is active. Driving low pulls to VSS, but driving high leaves the pin floating. Requires an external or internal pull-up resistor (e.g., I2C bus).
-3. **Pull-Up/Pull-Down**: Engages internal ~40 kΩ resistors to set a default state when the input is floating.
-4. **Output Speed (Slew Rate)**: Configures the rise and fall times of the output driver. Faster speeds are required for high-frequency signals (SPI, USART) but increase electromagnetic interference (EMI).`,
+The General-Purpose Input/Output (GPIO) peripheral block of the STM32L4Ax microcontroller family is a high-speed, flexible interface engineered to handle digital signaling, analog interfacing, and high-speed alternate function routing. Each GPIO pin can be independently configured by software to act as a digital input, digital output, alternate peripheral function (e.g., USART, SPI, I2C, CAN, Timer I/O), or high-precision analog port.
+
+#### Bus Matrix & Clock Domain Architecture
+In the STM32L4Ax architecture (governed by the RM0394 Reference Manual), all GPIO ports (GPIOA, GPIOB, GPIOC, GPIOD, GPIOE, GPIOF, GPIOG, GPIOH, and GPIOI) are situated on the high-performance **AHB2 (Advanced High-performance Bus 2)** matrix. The AHB2 bus is clocked by the Core/System Clock (HCLK), running at speeds up to 80 MHz. 
+
+Connecting the GPIOs to the AHB2 bus offers substantial electrical and computational advantages:
+- **Single-Cycle I/O Access:** The CPU can perform read or write operations to the GPIO registers in a single clock cycle, enabling ultra-low-latency pin state toggling and signal sampling.
+- **Direct Memory Access (DMA) Compatibility:** DMA controllers can access GPIO data registers (IDR/ODR) directly over the AHB matrix to move bulk data without CPU intervention.
+- **Independent Clock Gating:** Each GPIO port has its own clock enable bit in the Reset and Clock Control (RCC) AHB2 peripheral clock enable register (\`RCC_AHB2ENR\`). This enables granular power management, allowing unused ports to remain powered down.
+
+#### Core Hardware Execution Logic
+At the physical silicon layer, each GPIO pin is backed by a complementary bidirectional circuit containing ESD protection diodes, input/output control circuitry, and configurable pull-up/pull-down resistors:
+1. **Input Stage:** Signals from the external pin enter through a Schmitt trigger (which converts analog voltage levels into clean high/low digital states) before being latched into the Input Data Register (\`IDR\`). The Schmitt trigger can be disabled when the pin is in analog mode to save power.
+2. **Output Stage:** The Output Data Register (\`ODR\`) or Alternate Function output routes signals to the control logic. The output driver operates via two complementary MOSFETs:
+   - **P-MOSFET:** Active when driving a High level (pulling the pin to V_DD).
+   - **N-MOSFET:** Active when driving a Low level (pulling the pin to V_SS).
+3. **Alternate Function Multiplexer:** A 16-channel multiplexer routes pins to internal peripheral signals (AF0 through AF15), separating standard GPIO control from dedicated peripheral blocks.
+
+### Internal Block Diagram & Signal Routing
+
+The signal routing of an STM32L4Ax GPIO pin is characterized by multiple parallel paths configured via high-density digital switches. The internal block diagram represents how signals transition between the CPU core (AHB2 Bus Interface), internal peripherals, and the physical pin.
+
+[Diagram: STM32L4_GPIO_Internal_Signal_Routing_Matrix]
+
+#### Signal Path Mechanics:
+- **Digital Input Path:** External Pin ──► ESD Protection ──► Schmitt Trigger ──► Input Data Register (IDR) ──► AHB2 Bus.
+- **Digital Output Path:** AHB2 Bus ──► Output Data Register (ODR) / Bit Set-Reset Register (BSRR) ──► Output Control Logic ──► Complementary P-MOS/N-MOS Drivers ──► Pin.
+- **Alternate Function Path:** Peripheral Output (e.g., USART_TX) ──► AF Multiplexer (AFRL/AFRH) ──► Output Logic ──► Pin. Or Pin ──► AF Multiplexer ──► Peripheral Input (e.g., USART_RX).
+- **Analog Path:** External Pin ──► Analog Switch Control (ASCR) ──► ADC / DAC / Comparator (bypassing the digital Schmitt trigger and pull-up/down resistors).
+
+### Register-Level Deep Dive
+
+GPIO configuration on the STM32L4Ax is achieved by manipulating 10 memory-mapped registers per port. Each register has a base address offset from the port's primary boundary (e.g., GPIOA Base: \`0x48000000\`).
+
+| Register Name | Address Offset | Type | Description |
+| :--- | :--- | :--- | :--- |
+| \`GPIOx_MODER\` | \`0x00\` | R/W | GPIO Port Mode Register. Configures pins as Input (00), General Purpose Output (01), Alternate Function (10), or Analog (11). |
+| \`GPIOx_OTYPER\` | \`0x04\` | R/W | GPIO Port Output Type Register. Configures pins as Output Push-Pull (0) or Output Open-Drain (1). |
+| \`GPIOx_OSPEEDR\` | \`0x08\` | R/W | GPIO Port Output Speed Register. Sets the output slew rate to Low Speed (00), Medium Speed (01), High Speed (10), or Very High Speed (11). |
+| \`GPIOx_PUPDR\` | \`0x0C\` | R/W | GPIO Port Pull-Up/Pull-Down Register. Enables No Pull (00), Pull-Up (01), Pull-Down (10), or Reserved (11). |
+| \`GPIOx_IDR\` | \`0x10\` | Read-only | GPIO Port Input Data Register. Holds the digital values read from the physical pins. |
+| \`GPIOx_ODR\` | \`0x14\` | R/W | GPIO Port Output Data Register. Stores the digital value to be output on the pins. |
+| \`GPIOx_BSRR\` | \`0x18\` | Write-only | GPIO Port Bit Set/Reset Register. Allows atomic bitwise setting (bits 0-15) and resetting (bits 16-31) without read-modify-write races. |
+| \`GPIOx_LCKR\` | \`0x1C\` | R/W | GPIO Port Configuration Lock Register. Locks the configuration of the pin until the next system reset. |
+| \`GPIOx_AFRL\` | \`0x20\` | R/W | GPIO Alternate Function Low Register. Configures alternate function mapping for pins 0-7 (4 bits per pin). |
+| \`GPIOx_AFRH\` | \`0x24\` | R/W | GPIO Alternate Function High Register. Configures alternate function mapping for pins 8-15 (4 bits per pin). |
+| \`GPIOx_ASCR\` | \`0x2C\` | R/W | GPIO Analog Switch Control Register. Connects pins to ADC input channels. |
+
+#### Critical Bitfield Configurations & Hardware Behavior:
+
+##### 1. Mode Control (\`MODER[2y+1:2y]\`)
+For pin y, the two-bit field determines the functional mode:
+- **\`00\` (Input Mode):** The output driver is high-impedance (tri-stated). The input Schmitt trigger is enabled, and the register \`IDR\` is updated on every AHB2 clock cycle.
+- **\`01\` (Output Mode):** The output driver is active. High or low values written to \`ODR\` or \`BSRR\` are driven onto the pin. The read path to \`IDR\` remains active, allowing self-loopback sensing.
+- **\`10\` (Alternate Function Mode):** The pin is disconnected from the standard \`ODR\`/\`IDR\` registers and is directly routed to the specific internal peripheral configured in the \`AFRL\`/\`AFRH\` registers.
+- **\`11\` (Analog Mode):** The output buffer is disabled, the input Schmitt trigger is powered down, and internal pull-up/pull-down resistors are disconnected. This is crucial to prevent leakage current when high-impedance analog voltages are applied to ADC/DAC pins.
+
+##### 2. Alternate Function Mapping (\`AFR[4y+3:4y]\`)
+To map a pin y to a peripheral alternate function, you must write a 4-bit selector value to the appropriate alternate function register (\`AFRL\` for pins 0-7, \`AFRH\` for pins 8-15):
+- \`0000\` (AF0): System (e.g., SWD, JTAG, MCO)
+- \`0001\` (AF1): LPTIM1, TIM1/2
+- \`0010\` (AF2): TIM3/4/5
+- \`0011\` (AF3): TIM8, QuadSPI
+- \`0100\` (AF4): I2C1/2/3/4
+- \`0101\` (AF5): SPI1/2
+- \`0110\` (AF6): SPI3, DFSDM1
+- \`0111\` (AF7): USART1/2/3
+- \`1000\` (AF8): UART4/5, LPUART1
+- \`1001\` (AF9): CAN1, TSC, TIM15/16/17
+- \`1010\` (AF10): OTG_FS, QuadSPI, SAI1
+- \`1011\` (AF11): LCD, SWPMI1
+- \`1100\` (AF12): SDMMC1, FMC
+- \`1101\` (AF13): SAI2
+- \`1110\` (AF14): TIM2/15/16/LPTIM2
+- \`1111\` (AF15): EVENTOUT
+
+### Sequential Hardware Initialization Flow
+
+To configure and enable a GPIO peripheral block on the STM32L4Ax silicon securely, developers must adhere to a strict sequence to prevent race conditions or power state violations:
+
+1. **Enable Peripheral Clock (Clock Gating):**
+   Enable the clock for the target GPIO port by writing to the \`RCC_AHB2ENR\` register.
+2. **Implement Clock Stabilization Delay (Hardware-forced):**
+   Read the enable register or execute a dummy operation to allow the clock to stabilize before accessing the peripheral's register map.
+3. **Configure Alternate Function Routing (If applicable):**
+   If the pin operates in Alternate Function mode, configure the routing bits in \`GPIOx_AFRL\` or \`GPIOx_AFRH\` before changing the mode. This prevents temporary glitch transitions on the output pin.
+4. **Configure Output Physical Speed / Slew Rate:**
+   Write to \`GPIOx_OSPEEDR\` to select the slew rate matching the signal frequency.
+5. **Configure Output Type:**
+   Write to \`GPIOx_OTYPER\` to select between Push-Pull (default for high-speed digital) and Open-Drain (required for shared lines like I2C).
+6. **Configure Pull-Up / Pull-Down Resistors:**
+   Write to \`GPIOx_PUPDR\` to engage internal weak pull-up (~40 kΩ) or pull-down (~40 kΩ) resistors to avoid floating input states.
+7. **Configure Pin Mode:**
+   Write to \`GPIOx_MODER\` to set the pin to its final active state (Input, Output, Alternate Function, or Analog).
+
+### Production Pitfalls, Timing Gotchas, and Debugging
+
+When implementing register-level firmware or custom hardware designs using the STM32L4Ax GPIO matrix, embedded systems developers frequently encounter critical silicon constraints.
+
+#### Gotcha 1: RCC Peripheral Clock Enabling Delay
+- **The Problem:** Writing to a GPIO configuration register immediately after enabling its peripheral clock in the \`RCC_AHB2ENR\` register causes a hard fault or is completely ignored.
+- **The Cause:** The peripheral clock takes up to two clock cycles to stabilize and propagate through the bus synchronizers. The CPU, running at maximum speed, attempts to write to the register before the clock is active.
+- **The Solution:** Always insert a short delay or read the enabled clock register back immediately after setting the clock bit. Reading the register back acts as a hardware fence because the CPU must wait for the read bus transaction to complete before executing subsequent writes:
+  \`\`\`c
+  RCC->AHB2ENR |= RCC_AHB2ENR_GPIOAEN;
+  __volatile uint32_t delay = RCC->AHB2ENR; // Read back stabilizes the peripheral bus
+  \`\`\`
+
+#### Gotcha 2: High Slew Rate Speed and High-Frequency Noise (EMI)
+- **The Problem:** Setting the GPIO output speed register (\`OSPEEDR\`) to "Very High Speed" (\`11\`) on basic signals (like an LED blink or low-frequency SPI) causes severe electromagnetic interference (EMI) and signal reflections/overshoot on PCB traces.
+- **The Cause:** High-speed mode decreases the output transistor's transition time (slew rate), which increases high-frequency switching noise. The rapid voltage change (dV/dt) generates transient currents through stray inductances and capacitances.
+- **The Solution:** Match the output speed configuration to the signal's physical requirements. Use Low Speed (\`00\`) for standard indicator LEDs and buttons, Medium Speed (\`01\`) for signals under 10 MHz, and High or Very High Speed (\`10\` or \`11\`) only for high-speed protocols (e.g., SDIO, fast SPI, or USB) where fast edge transitions are electrically necessary.`,
     visualType: 'circuit',
     visualDesc: 'Internal Pin Schematic: Open-Drain vs. Push-Pull Output Transistor Configuration',
-    code: `/*
- * Configuring Open-Drain and Push-Pull Outputs
- * Board: Nucleo-L476RG
+    code: `/**
+ * ******************************************************************************
+ * @file    main.c
+ * @author  Embedded Systems Architect
+ * @brief   Bare-Metal GPIO Configuration & Slew-Rate Tuning for STM32L476RG
+ *          Target Hardware: Nucleo-STM32L476RG
+ *          Reference Manual: RM0394 (STM32L4Ax)
+ * ******************************************************************************
  */
-#include "stm32l4xx_hal.h"
 
-void Configure_GPIO_Modes(void) {
-    __HAL_RCC_GPIOA_CLK_ENABLE();
-    GPIO_InitTypeDef GPIO_InitStruct = {0};
-    
-    // 1. Configure PA5 as Standard Push-Pull Output (for LED)
-    GPIO_InitStruct.Pin = GPIO_PIN_5;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_PP;
-    GPIO_InitStruct.Pull = GPIO_NOPULL;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_LOW;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
-    
-    // 2. Configure PA6 as Open-Drain Output with internal Pull-up (e.g. standard signaling)
-    GPIO_InitStruct.Pin = GPIO_PIN_6;
-    GPIO_InitStruct.Mode = GPIO_MODE_OUTPUT_OD;
-    GPIO_InitStruct.Pull = GPIO_PULLUP;
-    GPIO_InitStruct.Speed = GPIO_SPEED_FREQ_MEDIUM;
-    HAL_GPIO_Init(GPIOA, &GPIO_InitStruct);
+#include "stm32l4xx.h"  // Include core CMSIS register map definitions
+
+/**
+ * @brief  Initializes GPIO Port A Pin 5 and Port C Pin 13 using bare-metal registers.
+ * @retval None
+ */
+void GPIO_Init_BareMetal(void) {
+    /* 1. ENABLE PERIPHERAL CLOCKS (Power & Clock Gating) */
+    // Enable clocks for GPIOA and GPIOC in the AHB2 peripheral clock enable register
+    RCC->AHB2ENR |= (RCC_AHB2ENR_GPIOAEN | RCC_AHB2ENR_GPIOCEN);
+
+    /* 2. CLOCK SYNCHRONIZATION DELAY */
+    // Reading back the clock register guarantees the clock is enabled and the bus
+    // is stable before we write to GPIO registers (requires at least 1 HCLK cycle delay)
+    __volatile uint32_t temp = RCC->AHB2ENR;
+    (void)temp; // Prevent compiler unused-variable warnings
+
+    /* =======================================================================
+     * CONFIGURATION: PORT A, PIN 5 (User LED LD2)
+     * Target Profile: General Purpose Output, Push-Pull, Low Speed, No-Pull
+     * ======================================================================= */
+
+    /* 3. CONFIGURE MODE */
+    // Clear mode bits for pin 5 (Bits 11:10)
+    GPIOA->MODER &= ~GPIO_MODER_MODE5_Msk;
+    // Set pin 5 to General Purpose Output mode (01)
+    GPIOA->MODER |= (0x01UL << GPIO_MODER_MODE5_Pos);
+
+    /* 4. CONFIGURE OUTPUT TYPE */
+    // Set PA5 to Push-Pull mode (Write 0 to Bit 5)
+    GPIOA->OTYPER &= ~GPIO_OTYPER_OT5_Msk;
+
+    /* 5. CONFIGURE OUTPUT SLEW RATE SPEED */
+    // Clear speed bits for pin 5 (Bits 11:10)
+    GPIOA->OSPEEDR &= ~GPIO_OSPEEDR_OSPEED5_Msk;
+    // Set to Low Speed (00) to minimize Electromagnetic Interference (EMI)
+    GPIOA->OSPEEDR |= (0x00UL << GPIO_OSPEEDR_OSPEED5_Pos);
+
+    /* 6. CONFIGURE PULL-UP/PULL-DOWN STATE */
+    // Clear pull configuration bits for pin 5 (Bits 11:10)
+    GPIOA->PUPDR &= ~GPIO_PUPDR_PUPD5_Msk;
+    // Set to No Pull-up/Pull-down (00) as the LED is driven actively by push-pull stage
+    GPIOA->PUPDR |= (0x00UL << GPIO_PUPDR_PUPD5_Pos);
+
+
+    /* =======================================================================
+     * CONFIGURATION: PORT C, PIN 13 (User Push Button)
+     * Target Profile: Input Mode, Pull-up resistor enabled
+     * Note: The Nucleo board has an external pull-up, but enabling internal
+     *       pull-up provides redundant noise immunity.
+     * ======================================================================= */
+
+    /* 7. CONFIGURE MODE */
+    // Clear mode bits for pin 13 (Bits 27:26)
+    GPIOC->MODER &= ~GPIO_MODER_MODE13_Msk;
+    // Set pin 13 to Digital Input mode (00)
+    GPIOC->MODER |= (0x00UL << GPIO_MODER_MODE13_Pos);
+
+    /* 8. CONFIGURE PULL-UP/PULL-DOWN STATE */
+    // Clear pull configuration bits for pin 13 (Bits 27:26)
+    GPIOC->PUPDR &= ~GPIO_PUPDR_PUPD13_Msk;
+    // Set PC13 to Pull-up mode (01) to keep the pin at solid VDD when button is released
+    GPIOC->PUPDR |= (0x01UL << GPIO_PUPDR_PUPD13_Pos);
 }
 
 int main(void) {
-    HAL_Init();
-    Configure_GPIO_Modes();
+    // Invoke low-level hardware configuration
+    GPIO_Init_BareMetal();
+
     while (1) {
-        HAL_GPIO_TogglePin(GPIOA, GPIO_PIN_5 | GPIO_PIN_6);
-        HAL_Delay(500);
+        /*
+         * READ INPUT STATE (PC13)
+         * The Input Data Register (IDR) holds the electrical state of Port C pins.
+         * The blue user button is active-LOW (reads 0 when pressed, 1 when released).
+         */
+        if ((GPIOC->IDR & GPIO_IDR_ID13_Msk) == 0) {
+            // Button is pressed (GND level detected)
+            // Atomically SET PA5 to 1 (Turns LED ON) using the Bit Set-Reset Register (BSRR)
+            GPIOA->BSRR = GPIO_BSRR_BS5;
+        } else {
+            // Button is released (VDD level detected)
+            // Atomically RESET PA5 to 0 (Turns LED OFF) using the Bit Reset Register (BRR)
+            GPIOA->BRR = GPIO_BRR_BR5;
+        }
     }
 }`
   },
