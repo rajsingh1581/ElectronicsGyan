@@ -7,12 +7,13 @@ export interface User {
   username: string;
   email: string;
   phone: string;
+  role: 'admin' | 'readonly';
 }
 
 interface AuthContextType {
   user: User | null;
   loading: boolean;
-  signup: (name: string, username: string, email: string, phone: string, pass: string) => Promise<{ success: boolean; error?: string }>;
+  signup: (name: string, username: string, email: string, phone: string, pass: string, role?: 'admin' | 'readonly') => Promise<{ success: boolean; error?: string }>;
   signin: (identifier: string, pass: string) => Promise<{ success: boolean; error?: string }>;
   signout: () => void;
 }
@@ -24,7 +25,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (typeof window !== 'undefined') {
       try {
         const storedUser = localStorage.getItem('eg_logged_in_user');
-        return storedUser ? JSON.parse(storedUser) : null;
+        if (storedUser) {
+          const parsed = JSON.parse(storedUser);
+          // Admin access mode can only be accessed with username rajsingh1581
+          if (parsed.role === 'admin' && parsed.username !== 'rajsingh1581') {
+            parsed.role = 'readonly';
+            localStorage.setItem('eg_logged_in_user', JSON.stringify(parsed));
+          }
+          return parsed;
+        }
       } catch (e) {
         console.error('Failed to parse logged in user', e);
       }
@@ -33,7 +42,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   });
   const [loading] = useState(false);
 
-  const signup = async (name: string, username: string, email: string, phone: string, pass: string) => {
+  const signup = async (name: string, username: string, email: string, phone: string, pass: string, role?: 'admin' | 'readonly') => {
     try {
       // Validate unique username and email in mock DB stored in localstorage
       const usersRaw = localStorage.getItem('eg_users') || '[]';
@@ -49,12 +58,24 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: 'Username already taken.' };
       }
 
-      const newUser = { name, username, email, phone, pass };
+      const isSystemAdmin = username.toLowerCase() === 'rajsingh1581';
+      
+      if (isSystemAdmin) {
+        if (pass !== 'GopalJ!108') {
+          return { success: false, error: 'Incorrect password for Admin account. Admin password must be GopalJ!108.' };
+        }
+      }
+
+      const assignedRole: 'admin' | 'readonly' = isSystemAdmin ? 'admin' : 'readonly';
+      const finalName = isSystemAdmin ? 'RAJ SINGH' : name;
+      const finalEmail = isSystemAdmin ? 'rajsingh1581@gmail.com' : email;
+
+      const newUser = { name: finalName, username, email: finalEmail, phone, pass, role: assignedRole };
       usersList.push(newUser);
       localStorage.setItem('eg_users', JSON.stringify(usersList));
 
       // Auto login
-      const publicUser: User = { name, username, email, phone };
+      const publicUser: User = { name: finalName, username, email: finalEmail, phone, role: assignedRole };
       localStorage.setItem('eg_logged_in_user', JSON.stringify(publicUser));
       setUser(publicUser);
 
@@ -67,6 +88,48 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
   const signin = async (identifier: string, pass: string) => {
     try {
+      const isSystemAdmin = 
+        identifier.toLowerCase() === 'rajsingh1581' || 
+        identifier.toLowerCase() === 'rajsingh1581@gmail.com';
+
+      if (isSystemAdmin) {
+        if (pass !== 'GopalJ!108') {
+          return { success: false, error: 'Incorrect password for Admin access.' };
+        }
+
+        // Standardize the admin user object
+        const adminUser: User = {
+          name: 'RAJ SINGH',
+          username: 'rajsingh1581',
+          email: 'rajsingh1581@gmail.com',
+          phone: '9876543210',
+          role: 'admin',
+        };
+
+        // Seed/Upsert admin into eg_users list so it's always in the DB if needed
+        const usersRaw = localStorage.getItem('eg_users') || '[]';
+        const usersList = JSON.parse(usersRaw);
+        const adminIdx = usersList.findIndex((u: any) => u.username.toLowerCase() === 'rajsingh1581');
+        if (adminIdx > -1) {
+          usersList[adminIdx] = { ...usersList[adminIdx], name: 'RAJ SINGH', pass: 'GopalJ!108', role: 'admin' };
+        } else {
+          usersList.push({
+            name: 'RAJ SINGH',
+            username: 'rajsingh1581',
+            email: 'rajsingh1581@gmail.com',
+            phone: '9876543210',
+            pass: 'GopalJ!108',
+            role: 'admin'
+          });
+        }
+        localStorage.setItem('eg_users', JSON.stringify(usersList));
+
+        // Set logged in user
+        localStorage.setItem('eg_logged_in_user', JSON.stringify(adminUser));
+        setUser(adminUser);
+        return { success: true };
+      }
+
       const usersRaw = localStorage.getItem('eg_users') || '[]';
       const usersList = JSON.parse(usersRaw);
 
@@ -82,11 +145,13 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return { success: false, error: 'Invalid identifier or password.' };
       }
 
+      // Any other user is strictly demoted/restricted to readonly
       const publicUser: User = {
-        name: matchedUser.name || matchedUser.username, // fall back to username if name is not set
+        name: matchedUser.name || matchedUser.username,
         username: matchedUser.username,
         email: matchedUser.email,
         phone: matchedUser.phone,
+        role: 'readonly',
       };
 
       localStorage.setItem('eg_logged_in_user', JSON.stringify(publicUser));

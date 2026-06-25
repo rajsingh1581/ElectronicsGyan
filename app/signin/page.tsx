@@ -24,6 +24,7 @@ export default function SignInPage() {
   const [signUpEmail, setSignUpEmail] = useState('');
   const [signUpPhone, setSignUpPhone] = useState('');
   const [signUpPassword, setSignUpPassword] = useState('');
+  const [signUpRole, setSignUpRole] = useState<'admin' | 'readonly'>('readonly');
 
   // Error & loading handling
   const [error, setError] = useState<string | null>(null);
@@ -127,7 +128,7 @@ export default function SignInPage() {
 
     setIsLoading(true);
     try {
-      const res = await signup(signUpName, signUpUsername, signUpEmail, signUpPhone, signUpPassword);
+      const res = await signup(signUpName, signUpUsername, signUpEmail, signUpPhone, signUpPassword, signUpRole);
       if (res.success) {
         setSuccessMsg('Account created successfully! Redirecting...');
         setTimeout(() => {
@@ -233,7 +234,7 @@ export default function SignInPage() {
                     value={signInIdentifier}
                     onChange={(e) => setSignInIdentifier(e.target.value)}
                     className="block w-full pl-10 pr-4 py-3 bg-background border border-panel-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand text-sm"
-                    placeholder="e.g. rajsingh"
+                    placeholder="e.g. rajsingh1581"
                     required
                   />
                 </div>
@@ -376,6 +377,38 @@ export default function SignInPage() {
                 </div>
               </div>
 
+              <div>
+                <label className="block text-xs font-semibold text-gray-300 uppercase tracking-wider mb-2">
+                  Select User Role / Permission Mode
+                </label>
+                <div className="grid grid-cols-2 gap-3 mt-1">
+                  <button
+                    type="button"
+                    onClick={() => setSignUpRole('readonly')}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                      signUpRole === 'readonly'
+                        ? 'bg-brand/10 border-brand text-brand'
+                        : 'bg-background border-panel-border text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    Read-Only User
+                    <span className="block text-[10px] font-normal text-gray-500 mt-0.5">Can only browse & read</span>
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => setSignUpRole('admin')}
+                    className={`py-2.5 px-3 rounded-xl border text-xs font-semibold transition-all cursor-pointer ${
+                      signUpRole === 'admin'
+                        ? 'bg-brand/10 border-brand text-brand'
+                        : 'bg-background border-panel-border text-gray-400 hover:text-gray-200'
+                    }`}
+                  >
+                    Admin / Contributor
+                    <span className="block text-[10px] font-normal text-gray-500 mt-0.5">Full edit and CRUD tools</span>
+                  </button>
+                </div>
+              </div>
+
               <button
                 type="submit"
                 disabled={isLoading}
@@ -402,31 +435,32 @@ export default function SignInPage() {
           {/* Quick Demo Preloads */}
           <div className="mt-8 pt-6 border-t border-panel-border text-center">
             <span className="text-xs text-gray-500 block mb-2">
-              Want a quick test session? Use any login credentials after registration, or use this pre-configured engineering partner:
+              Want a quick test session? Click below to autofill the requested Admin credentials:
             </span>
             <button
               type="button"
               onClick={() => {
                 setMode('signin');
-                setSignInIdentifier('rajsingh');
-                setSignInPassword('engineering2026');
-                // Seed a user in localStorage if not exists so it functions immediately
+                setSignInIdentifier('rajsingh1581');
+                setSignInPassword('GopalJ!108');
+                // Seed the exclusive admin in localStorage if not exists so it functions immediately
                 const existing = localStorage.getItem('eg_users') || '[]';
                 const list = JSON.parse(existing);
-                if (!list.some((u: any) => u.username === 'rajsingh')) {
+                if (!list.some((u: any) => u.username === 'rajsingh1581')) {
                   list.push({
-                    name: 'Raj Singh',
-                    username: 'rajsingh',
+                    name: 'RAJ SINGH',
+                    username: 'rajsingh1581',
                     email: 'rajsingh1581@gmail.com',
                     phone: '9876543210',
-                    pass: 'engineering2026'
+                    pass: 'GopalJ!108',
+                    role: 'admin'
                   });
                   localStorage.setItem('eg_users', JSON.stringify(list));
                 }
               }}
               className="px-3 py-1.5 rounded bg-background border border-panel-border hover:border-gray-600 text-[11px] font-mono text-gray-400 hover:text-white transition-all inline-block cursor-pointer"
             >
-              Click to Autofill Demo User
+              Click to Autofill Admin Credentials
             </button>
           </div>
 

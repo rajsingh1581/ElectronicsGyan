@@ -1,12 +1,68 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import Link from 'next/link';
-import { Terminal, ChevronRight, BookOpen, Clock, Code2, Rss, ArrowLeft, Lightbulb } from 'lucide-react';
+import { 
+  Terminal, 
+  ChevronRight, 
+  BookOpen, 
+  Clock, 
+  Code2, 
+  Rss, 
+  ArrowLeft, 
+  Lightbulb, 
+  Sparkles, 
+  ShieldCheck, 
+  Play, 
+  BookOpenCheck 
+} from 'lucide-react';
 import { motion } from 'motion/react';
+import { useAuth } from '@/lib/AuthContext';
+import ReactMarkdown from 'react-markdown';
+
+interface Topic {
+  id: string;
+  name: string;
+  content: string;
+  youtubeUrl?: string;
+  isBuiltIn?: boolean;
+}
 
 export default function ArduinoTutorialPage() {
-  const [activeTab, setActiveTab] = useState<'basics' | 'millis' | 'interrupts' | 'esp32'>('basics');
+  const { user } = useAuth();
+  const [activeTab, setActiveTab] = useState<string>('basics');
+  const [dynamicTopics, setDynamicTopics] = useState<Topic[]>([]);
+  const [selectedCustomTopic, setSelectedCustomTopic] = useState<Topic | null>(null);
+
+  useEffect(() => {
+    fetch('/api/tutorials?stack=arduino')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          // Keep only the non-built-in custom topics
+          const custom = data.topics.filter((t: any) => !t.isBuiltIn);
+          setDynamicTopics(custom);
+        }
+      })
+      .catch((err) => console.error('Error fetching dynamic topics:', err));
+  }, []);
+
+  const selectBuiltInTab = (tabId: string) => {
+    setActiveTab(tabId);
+    setSelectedCustomTopic(null);
+  };
+
+  const selectCustomTopic = (topic: Topic) => {
+    setActiveTab(topic.id);
+    setSelectedCustomTopic(topic);
+  };
+
+  const staticTabs = [
+    { id: 'basics', label: '1. Anatomy & Core Structure', icon: BookOpen },
+    { id: 'millis', label: '2. Non-blocking with millis()', icon: Clock },
+    { id: 'interrupts', label: '3. Hardware Interrupts (ISR)', icon: Code2 },
+    { id: 'esp32', label: '4. ESP32 Wi-Fi & Web Servers', icon: Rss }
+  ];
 
   return (
     <div className="w-full bg-background min-h-screen text-white pb-20">
@@ -62,31 +118,76 @@ export default function ArduinoTutorialPage() {
         <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
           
           {/* Navigation Sidebar */}
-          <div className="lg:col-span-1 space-y-2">
-            <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-3">Syllabus Outline</h3>
-            {[
-              { id: 'basics', label: '1. Anatomy & Core Structure', icon: BookOpen },
-              { id: 'millis', label: '2. Non-blocking with millis()', icon: Clock },
-              { id: 'interrupts', label: '3. Hardware Interrupts (ISR)', icon: Code2 },
-              { id: 'esp32', label: '4. ESP32 Wi-Fi & Web Servers', icon: Rss }
-            ].map((tab) => {
-              const TabIcon = tab.icon;
-              const isActive = activeTab === tab.id;
-              return (
-                <button
-                  key={tab.id}
-                  onClick={() => setActiveTab(tab.id as any)}
-                  className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-left border cursor-pointer ${
-                    isActive 
-                      ? 'bg-brand/10 border-brand/40 text-brand' 
-                      : 'bg-panel/40 border-panel-border/60 text-gray-300 hover:bg-panel/80 hover:text-white'
-                  }`}
+          <div className="lg:col-span-1 space-y-6">
+            <div>
+              <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider px-3 mb-3">Syllabus Outline</h3>
+              <div className="space-y-1.5">
+                {staticTabs.map((tab) => {
+                  const TabIcon = tab.icon;
+                  const isActive = activeTab === tab.id;
+                  return (
+                    <button
+                      key={tab.id}
+                      onClick={() => selectBuiltInTab(tab.id)}
+                      className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-left border cursor-pointer ${
+                        isActive 
+                          ? 'bg-brand/10 border-brand/40 text-brand' 
+                          : 'bg-panel/40 border-panel-border/60 text-gray-300 hover:bg-panel/80 hover:text-white'
+                      }`}
+                    >
+                      <TabIcon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand' : 'text-gray-400'}`} />
+                      <span>{tab.label}</span>
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+
+            {/* Dynamic Contributed Topics */}
+            {dynamicTopics.length > 0 && (
+              <div>
+                <h3 className="text-xs font-bold text-brand uppercase tracking-wider px-3 mb-3 flex items-center gap-1.5">
+                  <Sparkles className="w-3.5 h-3.5 text-brand" /> Dynamic Custom Lessons
+                </h3>
+                <div className="space-y-1.5">
+                  {dynamicTopics.map((topic) => {
+                    const isActive = activeTab === topic.id;
+                    return (
+                      <button
+                        key={topic.id}
+                        onClick={() => selectCustomTopic(topic)}
+                        className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl text-sm font-semibold transition-all text-left border cursor-pointer ${
+                          isActive 
+                            ? 'bg-brand/10 border-brand/40 text-brand' 
+                            : 'bg-panel/40 border-panel-border/60 text-gray-300 hover:bg-panel/80 hover:text-white'
+                        }`}
+                      >
+                        <BookOpenCheck className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand' : 'text-brand/50'}`} />
+                        <span>{topic.name}</span>
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            )}
+
+            {/* Admin Management Widget */}
+            {user?.role === 'admin' && (
+              <div className="p-4 rounded-2xl bg-brand/5 border border-brand/20 space-y-3 font-sans">
+                <div className="flex items-center gap-1.5 text-brand font-bold text-xs">
+                  <ShieldCheck className="w-4 h-4" /> Admin Access Mode
+                </div>
+                <p className="text-[11px] text-gray-400 leading-relaxed">
+                  You are logged in as Administrator. You have full edit access to modify syllabus chapters or inject topics.
+                </p>
+                <Link
+                  href="/tutorial/admin"
+                  className="w-full flex items-center justify-center gap-1.5 py-2 bg-brand text-white font-bold text-xs rounded-xl hover:bg-brand-light transition-all cursor-pointer text-center"
                 >
-                  <TabIcon className={`w-4 h-4 shrink-0 ${isActive ? 'text-brand' : 'text-gray-400'}`} />
-                  <span>{tab.label}</span>
-                </button>
-              );
-            })}
+                  <Sparkles className="w-3 h-3" /> Launch CMS Studio
+                </Link>
+              </div>
+            )}
           </div>
 
           {/* Main Module Content */}
@@ -278,6 +379,50 @@ void loop() {
     server.handleClient();
 }`}
                     </pre>
+                  </div>
+                </motion.div>
+              )}
+
+              {/* Dynamic / Custom Topic rendering */}
+              {selectedCustomTopic && (
+                <motion.div 
+                  key={selectedCustomTopic.id}
+                  initial={{ opacity: 0, y: 10 }} 
+                  animate={{ opacity: 1, y: 0 }} 
+                  transition={{ duration: 0.3 }} 
+                  className="space-y-6"
+                >
+                  <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-panel-border pb-3">
+                    <h2 className="text-2xl sm:text-3xl font-bold font-heading text-white flex items-center gap-3">
+                      <Sparkles className="text-cyan-400 h-7 w-7" />
+                      {selectedCustomTopic.name}
+                    </h2>
+                    {user?.role === 'admin' && (
+                      <Link
+                        href="/tutorial/admin"
+                        className="px-4 py-1.5 bg-brand hover:bg-brand-light text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                      >
+                        Edit Topic
+                      </Link>
+                    )}
+                  </div>
+
+                  {/* YouTube Embed Video */}
+                  {selectedCustomTopic.youtubeUrl && (
+                    <div className="aspect-video w-full rounded-2xl overflow-hidden border border-panel-border/80 bg-black/40">
+                      <iframe
+                        src={selectedCustomTopic.youtubeUrl}
+                        title={selectedCustomTopic.name}
+                        className="w-full h-full"
+                        allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                        allowFullScreen
+                      />
+                    </div>
+                  )}
+
+                  {/* Rich Text Markdown Render block */}
+                  <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed text-sm sm:text-base">
+                    <ReactMarkdown>{selectedCustomTopic.content}</ReactMarkdown>
                   </div>
                 </motion.div>
               )}

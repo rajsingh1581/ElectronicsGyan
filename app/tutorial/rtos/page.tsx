@@ -35,9 +35,14 @@ import {
   RotateCcw,
   ShieldAlert,
   ArrowRight,
-  ListTodo
+  ListTodo,
+  Sparkles,
+  ShieldCheck,
+  BookOpenCheck
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
+import { useAuth } from '@/lib/AuthContext';
+import ReactMarkdown from 'react-markdown';
 import { API_TOPICS, ApiTopic } from './data';
 import { THEORY_SECTIONS, TheorySection } from './theoryData';
 
@@ -1041,17 +1046,40 @@ function TheoryVisualizer({ type }: { type: string }) {
   );
 }
 
+interface CustomTopic {
+  id: string;
+  name: string;
+  content: string;
+  youtubeUrl?: string;
+  isBuiltIn?: boolean;
+}
+
 // Inner component requiring useSearchParams inside Suspense
 function RtosExplorerInner() {
+  const { user } = useAuth();
   const searchParams = useSearchParams();
   const router = useRouter();
 
   // Search, filter, and selection state
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedModule, setSelectedModule] = useState<string>('all');
+  const [dynamicTopics, setDynamicTopics] = useState<CustomTopic[]>([]);
+  const [selectedCustomTopic, setSelectedCustomTopic] = useState<CustomTopic | null>(null);
+
+  useEffect(() => {
+    fetch('/api/tutorials?stack=rtos')
+      .then((res) => res.json())
+      .then((data) => {
+        if (data.success) {
+          const custom = data.topics.filter((t: any) => !t.isBuiltIn);
+          setDynamicTopics(custom);
+        }
+      })
+      .catch((err) => console.error('Error fetching dynamic topics:', err));
+  }, []);
   
   // Set default selected values from URL search parameter keys
-  const activeTab = searchParams.get('tab') === 'api' ? 'api' : 'theory';
+  const activeTab = searchParams.get('tab') === 'api' ? 'api' : searchParams.get('tab') === 'custom' ? 'custom' : 'theory';
   const selectedTheoryId = searchParams.get('theory') || 'about_rtos';
   const selectedApiId = searchParams.get('api') || 'xTaskCreate';
 
@@ -1059,6 +1087,7 @@ function RtosExplorerInner() {
   const handleSelectTab = (tab: 'theory' | 'api') => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', tab);
+    params.delete('id');
     if (tab === 'theory') {
       params.delete('api');
       if (!params.get('theory')) params.set('theory', 'about_rtos');
@@ -1073,14 +1102,26 @@ function RtosExplorerInner() {
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', 'theory');
     params.set('theory', id);
+    params.delete('id');
     router.push(`/tutorial/rtos?${params.toString()}`, { scroll: false });
+    setSelectedCustomTopic(null);
   };
 
   const handleSelectApi = (id: string) => {
     const params = new URLSearchParams(searchParams.toString());
     params.set('tab', 'api');
     params.set('api', id);
+    params.delete('id');
     router.push(`/tutorial/rtos?${params.toString()}`, { scroll: false });
+    setSelectedCustomTopic(null);
+  };
+
+  const handleSelectCustom = (topic: CustomTopic) => {
+    const params = new URLSearchParams();
+    params.set('tab', 'custom');
+    params.set('id', topic.id);
+    router.push(`/tutorial/rtos?${params.toString()}`, { scroll: false });
+    setSelectedCustomTopic(topic);
   };
 
   // 1. FILTERING FOR THEORY TAB
@@ -1117,6 +1158,11 @@ function RtosExplorerInner() {
   const activeApi = useMemo(() => {
     return API_TOPICS.find((t) => t.id === selectedApiId) || API_TOPICS[0];
   }, [selectedApiId]);
+
+  const activeCustomTopic = useMemo(() => {
+    const customId = searchParams.get('id');
+    return dynamicTopics.find((t) => t.id === customId) || selectedCustomTopic || dynamicTopics[0] || null;
+  }, [searchParams, dynamicTopics, selectedCustomTopic]);
 
   return (
     <div className="space-y-6">
@@ -1303,6 +1349,52 @@ function RtosExplorerInner() {
             </div>
           </div>
 
+          {/* Dynamic Contributed Topics */}
+          {dynamicTopics.length > 0 && (
+            <div className="bg-panel/40 border border-panel-border/40 rounded-2xl p-4 space-y-2">
+              <span className="text-[10px] font-bold text-brand uppercase tracking-wider block mb-2 px-1 flex items-center gap-1.5 font-sans">
+                <Sparkles className="w-3.5 h-3.5 text-brand" /> Dynamic Custom Lessons
+              </span>
+              <div className="max-h-[300px] overflow-y-auto space-y-1 pr-1 custom-scrollbar">
+                {dynamicTopics.map((topic) => {
+                  const isActive = activeTab === 'custom' && activeCustomTopic?.id === topic.id;
+                  return (
+                    <button
+                      key={topic.id}
+                      onClick={() => handleSelectCustom(topic)}
+                      className={`w-full flex items-center justify-between px-3 py-2.5 rounded-xl text-left border cursor-pointer transition-all ${
+                        isActive 
+                          ? 'bg-brand/10 border-brand/40 text-brand' 
+                          : 'bg-panel/40 border-panel-border/30 text-gray-300 hover:bg-panel/80 hover:text-white'
+                      }`}
+                    >
+                      <span className="text-xs font-bold leading-tight truncate font-sans">{topic.name}</span>
+                      <ChevronRight className={`w-3.5 h-3.5 transition-transform ${isActive ? 'translate-x-1' : 'opacity-35'}`} />
+                    </button>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Admin Management Widget */}
+          {user?.role === 'admin' && (
+            <div className="p-4 rounded-2xl bg-brand/5 border border-brand/20 space-y-3 font-sans">
+              <div className="flex items-center gap-1.5 text-brand font-bold text-xs">
+                <ShieldCheck className="w-4 h-4" /> Admin Access Mode
+              </div>
+              <p className="text-[11px] text-gray-400 leading-relaxed">
+                You are logged in as Administrator. You have full edit access to modify syllabus chapters or inject topics.
+              </p>
+              <Link
+                href="/tutorial/admin"
+                className="w-full flex items-center justify-center gap-1.5 py-2 bg-brand text-white font-bold text-xs rounded-xl hover:bg-brand-light transition-all cursor-pointer text-center"
+              >
+                <Sparkles className="w-3 h-3" /> Launch CMS Studio
+              </Link>
+            </div>
+          )}
+
           {/* Quick Help Card */}
           <div className="p-4 bg-panel border border-panel-border rounded-2xl space-y-2.5 font-sans">
             <h4 className="text-xs font-bold text-white flex items-center gap-1.5 uppercase tracking-wide">
@@ -1323,8 +1415,54 @@ function RtosExplorerInner() {
         <div className="lg:col-span-3">
           <AnimatePresence mode="wait">
             
-            {/* RENDER THEORY TAB CONTENT */}
-            {activeTab === 'theory' ? (
+            {/* RENDER CUSTOM TOPIC CONTENT */}
+            {activeTab === 'custom' && activeCustomTopic ? (
+              <motion.div
+                key={activeCustomTopic.id}
+                initial={{ opacity: 0, y: 15 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -15 }}
+                transition={{ duration: 0.25 }}
+                className="bg-panel border border-panel-border/80 rounded-3xl overflow-hidden shadow-2xl p-6 sm:p-10 font-sans"
+              >
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 border-b border-panel-border pb-3 mb-6">
+                  <div>
+                    <span className="text-[10px] font-bold text-brand uppercase tracking-wider font-mono bg-brand/10 border border-brand/20 px-2.5 py-0.5 rounded-full">
+                      Custom Lesson • RTOS Academy
+                    </span>
+                    <h2 className="text-xl sm:text-2xl font-extrabold text-white mt-1.5 font-heading">
+                      {activeCustomTopic.name}
+                    </h2>
+                  </div>
+                  {user?.role === 'admin' && (
+                    <Link
+                      href="/tutorial/admin"
+                      className="px-4 py-1.5 bg-brand hover:bg-brand-light text-white text-xs font-bold rounded-xl transition-all flex items-center gap-1 cursor-pointer"
+                    >
+                      Edit Topic
+                    </Link>
+                  )}
+                </div>
+
+                {/* YouTube Embed Video */}
+                {activeCustomTopic.youtubeUrl && (
+                  <div className="aspect-video w-full rounded-2xl overflow-hidden border border-panel-border/80 bg-black/40 mb-6 font-sans">
+                    <iframe
+                      src={activeCustomTopic.youtubeUrl}
+                      title={activeCustomTopic.name}
+                      className="w-full h-full"
+                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                      allowFullScreen
+                    />
+                  </div>
+                )}
+
+                {/* Rich Text Markdown Render block */}
+                <div className="prose prose-invert max-w-none text-gray-300 leading-relaxed text-sm sm:text-base">
+                  <ReactMarkdown>{activeCustomTopic.content}</ReactMarkdown>
+                </div>
+              </motion.div>
+            ) : activeTab === 'theory' ? (
               <motion.div
                 key={activeTheory.id}
                 initial={{ opacity: 0, y: 15 }}
