@@ -3,7 +3,7 @@
 import { useState } from 'react';
 import Link from 'next/link';
 import Image from 'next/image';
-import { Menu, X, ChevronDown, Cpu, Lightbulb, BookOpen, Mail, Handshake, Home, LogOut, User as UserIcon } from 'lucide-react';
+import { Menu, X, ChevronDown, Cpu, BookOpen, Mail, Handshake, Home, LogOut, User as UserIcon, Terminal } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 import Logo from '@/components/Logo';
 import { useAuth } from '@/lib/AuthContext';
@@ -35,21 +35,13 @@ const navItems = [
       { label: 'RTOS', href: '/tutorial/rtos' },
       { label: 'STM32', href: '/tutorial/stm32' },
       { label: 'Arduino', href: '/tutorial/arduino' },
-      { label: 'Raspberry', href: '/tutorial/raspberry-pi' },
+      { label: 'Raspberry Pi', href: '/tutorial/raspberry-pi' },
     ],
   },
   {
-    label: 'Ideas',
-    href: '/ideas',
-    icon: Lightbulb,
-    subItems: [
-      { label: 'Electronics', href: '/ideas/electronics' },
-      { label: 'Electrical', href: '/ideas/electrical' },
-      { label: 'Software', href: '/ideas/software' },
-      { label: 'Mechanical', href: '/ideas/mechanical' },
-      { label: 'Android', href: '/ideas/android' },
-      { label: 'Communication', href: '/ideas/communication' },
-    ],
+    label: 'C++ Compiler',
+    href: '/compiler',
+    icon: Terminal,
   },
   {
     label: 'Contact',

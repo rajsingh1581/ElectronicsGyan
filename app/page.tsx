@@ -1,9 +1,10 @@
 import Image from 'next/image';
 import Link from 'next/link';
-import { Search, ArrowRight, Microchip, Cpu, Code2, PenTool } from 'lucide-react';
+import { ArrowRight, Microchip, Cpu, Code2, PenTool } from 'lucide-react';
 import Logo from '@/components/Logo';
 import AiChatBot from '@/components/AiChatBot';
 import ProjectSlideshow from '@/components/ProjectSlideshow';
+import GlobalSearch from '@/components/GlobalSearch';
 
 export default function Home() {
   return (
@@ -25,21 +26,9 @@ export default function Home() {
           Your ultimate destination to learn, build, and innovate. We share comprehensive engineering projects, complete with Bill of Materials (BOMs), circuit schematics, source code, and step-by-step tutorials to help you turn ideas into reality.
         </p>
 
-        {/* Global Search Bar */}
-        <div className="w-full max-w-2xl mx-auto relative group mb-12">
-          <div className="absolute inset-y-0 left-0 pl-4 flex items-center pointer-events-none">
-            <Search className="h-5 w-5 text-gray-400 group-focus-within:text-brand transition-colors" />
-          </div>
-          <input
-            type="text"
-            className="block w-full pl-11 pr-4 py-3 sm:py-4 bg-panel border-2 border-panel-border rounded-xl text-white placeholder-gray-500 focus:outline-none focus:border-brand focus:ring-1 focus:ring-brand transition-all shadow-lg text-sm sm:text-base"
-            placeholder="Search electronics projects, tutorials, or components..."
-          />
-          <div className="absolute inset-y-0 right-0 pr-2 flex items-center">
-            <button className="bg-brand hover:bg-brand-light text-white px-3 sm:px-4 py-1.5 sm:py-2 rounded-lg font-medium transition-colors text-sm sm:text-base">
-              Search
-            </button>
-          </div>
+        {/* Live Google-Grounded Global Search */}
+        <div className="w-full mb-8">
+          <GlobalSearch />
         </div>
       </section>
 
