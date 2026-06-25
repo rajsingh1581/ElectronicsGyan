@@ -43,7 +43,7 @@ const tutorialTracks = [
   },
   {
     id: 'raspberry-pi',
-    title: 'Raspberry Pi & Pico',
+    title: 'Raspberry & Pico',
     description: 'Explore full Linux SBC hardware control with Python GPIOs and bare-metal RP2040 Pico C/C++ SDK development.',
     icon: Terminal,
     href: '/tutorial/raspberry-pi',

@@ -325,7 +325,7 @@ void setup() {
       case 'arduino':
         return <span className="px-2.5 py-1 bg-cyan-500/10 text-cyan-400 border border-cyan-500/20 rounded-full text-xs font-mono">Arduino</span>;
       case 'raspberry-pi':
-        return <span className="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-mono">Raspberry Pi</span>;
+        return <span className="px-2.5 py-1 bg-rose-500/10 text-rose-400 border border-rose-500/20 rounded-full text-xs font-mono">Raspberry</span>;
       default:
         return <span className="px-2.5 py-1 bg-gray-500/10 text-gray-400 border border-gray-500/20 rounded-full text-xs font-mono">{stack}</span>;
     }
@@ -414,7 +414,7 @@ void setup() {
             </p>
           </div>
           <div className="bg-panel border border-panel-border/60 p-4 rounded-2xl">
-            <p className="text-xs text-rose-400 font-semibold">Raspberry Pi</p>
+            <p className="text-xs text-rose-400 font-semibold">Raspberry</p>
             <p className="text-2xl font-black font-heading text-white mt-1">
               {topics.filter((t) => t.stack === 'raspberry-pi').length}
             </p>
@@ -603,7 +603,7 @@ void setup() {
                       <option value="rtos">RTOS (Real-Time Systems)</option>
                       <option value="stm32">STM32 (ARM Cortex-M)</option>
                       <option value="arduino">Arduino & ESP32</option>
-                      <option value="raspberry-pi">Raspberry Pi & Pico</option>
+                      <option value="raspberry-pi">Raspberry & Pico</option>
                     </select>
                   </div>
                 </div>

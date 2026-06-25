@@ -35,7 +35,7 @@ const navItems = [
       { label: 'RTOS', href: '/tutorial/rtos' },
       { label: 'STM32', href: '/tutorial/stm32' },
       { label: 'Arduino', href: '/tutorial/arduino' },
-      { label: 'Raspberry Pi', href: '/tutorial/raspberry-pi' },
+      { label: 'Raspberry', href: '/tutorial/raspberry-pi' },
     ],
   },
   {

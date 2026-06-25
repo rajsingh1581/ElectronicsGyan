@@ -71,7 +71,7 @@ export default function RaspberryPiTutorialPage() {
             <ChevronRight className="w-4 h-4" />
             <Link href="/tutorial" className="hover:text-brand transition-colors">Tutorials</Link>
             <ChevronRight className="w-4 h-4" />
-            <span className="text-white font-medium">Raspberry Pi</span>
+            <span className="text-white font-medium">Raspberry</span>
           </div>
           <Link href="/tutorial" className="inline-flex items-center text-xs text-brand hover:text-brand-light font-semibold transition-all">
             <ArrowLeft className="w-3.5 h-3.5 mr-1" /> Back to Tracks
@@ -91,7 +91,7 @@ export default function RaspberryPiTutorialPage() {
                 <span className="text-xs text-gray-400">• Level: Intermediate</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-extrabold font-heading text-white tracking-tight mb-4">
-                Raspberry Pi & <span className="text-brand">Pi Pico</span>
+                Raspberry & <span className="text-brand">Pi Pico</span>
               </h1>
               <p className="text-gray-400 text-base max-w-3xl leading-relaxed">
                 Unlock full single-board computing power. Transition from headless Linux OS configurations and Python scripting to dual-core ARM Cortex bare-metal firmware using the Pi Pico C/C++ SDK.
@@ -199,7 +199,7 @@ export default function RaspberryPiTutorialPage() {
                   </h2>
                   
                   <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                    Deploying a Raspberry Pi inside products or enclosures means you rarely connect a monitor, keyboard, or mouse. A **headless configuration** allows configuring Wi-Fi and Secure Shell (SSH) access directly on the microSD card.
+                    Deploying a Raspberry inside products or enclosures means you rarely connect a monitor, keyboard, or mouse. A **headless configuration** allows configuring Wi-Fi and Secure Shell (SSH) access directly on the microSD card.
                   </p>
 
                   <h3 className="text-lg font-bold font-heading text-white mt-8 mb-3">Headless Command Prompt Checklist</h3>
@@ -231,7 +231,7 @@ network={
                   </h2>
 
                   <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                    Raspberry Pi runs a full Debian-based Linux distribution (Raspberry Pi OS). This enables scripting hardware interactions directly in Python using standard libraries.
+                    Raspberry runs a full Debian-based Linux distribution (Raspberry OS). This enables scripting hardware interactions directly in Python using standard libraries.
                   </p>
 
                   <h3 className="text-lg font-bold font-heading text-white mt-8 mb-3">Python Blinking GPIO Logic</h3>
@@ -270,11 +270,11 @@ finally:
                 <motion.div initial={{ opacity: 0, y: 10 }} animate={{ opacity: 1, y: 0 }} transition={{ duration: 0.3 }} className="space-y-6">
                   <h2 className="text-2xl sm:text-3xl font-bold font-heading text-white border-b border-panel-border pb-3 flex items-center gap-3">
                     <BookOpen className="text-rose-400 h-7 w-7" />
-                    Raspberry Pi Pico C/C++ SDK
+                    Raspberry Pico C/C++ SDK
                   </h2>
 
                   <p className="text-gray-300 leading-relaxed text-sm sm:text-base">
-                    The **Raspberry Pi Pico** is a bare-metal microcontroller powered by the custom RP2040 chip. While it can run MicroPython, developing with the official C/C++ SDK provides maximum clock execution speeds and optimal low-level hardware control.
+                    The **Raspberry Pico** is a bare-metal microcontroller powered by the custom RP2040 chip. While it can run MicroPython, developing with the official C/C++ SDK provides maximum clock execution speeds and optimal low-level hardware control.
                   </p>
 
                   <h3 className="text-lg font-bold font-heading text-white mt-8 mb-3">Pico C SDK Hello World</h3>
