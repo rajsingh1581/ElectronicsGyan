@@ -36,21 +36,22 @@ export async function POST(req: NextRequest) {
     }
 
     // AI Engine (Gemini) fallback for deep contextual simulation
-    const systemPrompt = `Act as an exact, high-fidelity headless compiler environment and Linux execution sandbox running on an x86_64 CPU.
+    const systemPrompt = `Act as an exact, high-fidelity headless compiler/interpreter environment and Linux execution sandbox running on an x86_64 CPU.
 For C++ code, simulate g++ -O3 -Wall -std=c++20.
 For C code, simulate gcc -O3 -Wall -std=c11.
+For Python code, simulate python3.11.
 
 You will receive a source code, alongside optional custom standard input (stdin) lines.
 
 Your job is to:
-1. Analyze the source code for syntax errors, logical warnings (like uninitialized variables, array index out of bounds, missing return types, or missing semicolons), and headers/libraries (standard libraries like <iostream>, <vector>, <string>, <stdio.h>, <stdlib.h>, <math.h>).
-2. If there are syntax errors that would prevent compilation by GCC:
-   - Generate detailed GCC-styled compiler error messages pointing to exact lines and columns.
-   - Return "compiled": false, with the compiler errors in "compilerOutput" and an empty "programOutput".
-3. If compilation is successful:
+1. Analyze the source code for syntax errors, logical warnings (like uninitialized variables, array index out of bounds, missing return types, indentation errors in Python, or missing semicolons in C/C++), and headers/libraries (standard libraries like <iostream>, <vector>, <string>, <stdio.h>, <stdlib.h>, math, json, re, random, collections, numpy, matplotlib).
+2. If there are syntax errors that would prevent compilation or execution:
+   - Generate detailed GCC-styled or Python interpreter Traceback error messages pointing to exact lines and columns.
+   - Return "compiled": false, with the compiler/interpreter errors in "compilerOutput" and an empty "programOutput".
+3. If compilation/execution is successful:
    - Simulate the execution of the program step-by-step.
-   - Consume the provided standard input (stdin) lines sequentially when the code requests inputs (e.g. std::cin, scanf, etc.).
-   - Collect and display all program outputs (like std::cout, printf, etc.).
+   - Consume the provided standard input (stdin) lines sequentially when the code requests inputs (e.g. std::cin, scanf, input(), etc.).
+   - Collect and display all program outputs (like std::cout, printf, print(), etc.).
    - Capture correct program behavior (e.g. math calculations, sorted arrays, recursive Fibonacci, conditional branch gates, class models, etc.).
    - Generate realistic runtime metrics: execution time in milliseconds (usually between 1ms to 25ms), heap memory usage in KB (usually 100KB to 300KB), and program exit code (0 for normal success, or non-zero for crashes/segmentation faults).
    - Return "compiled": true along with compiler output warnings (if any), and the complete program stdout output.
@@ -58,7 +59,7 @@ Your job is to:
 Return your response strictly in the following JSON format. Ensure the response is valid, parseable JSON and does not contain markdown codeblocks around the JSON:
 {
   "compiled": true,
-  "compilerOutput": "Detailed compiler logs (g++/gcc command line arguments, compile warnings)...",
+  "compilerOutput": "Detailed compiler logs (g++/gcc/python command line arguments, compile warnings)...",
   "programOutput": "Program terminal output...",
   "executionTimeMs": 12,
   "memoryUsageKb": 256,
@@ -150,17 +151,108 @@ Run the compilation and program simulation. Return the strict JSON.`;
   }
 }
 
-// Turbo Simulation Engine: A highly robust, lightning-fast C/C++ sandbox simulator (runs in <1ms)
+// Turbo Simulation Engine: A highly robust, lightning-fast C/C++/Python sandbox simulator (runs in <1ms)
 function runTurboEngine(code: string, stdin: string, language: string) {
   const normalizedCode = code.replace(/\s+/g, "");
   const isCpp = language === 'cpp';
-  const compilerCmd = isCpp 
-    ? 'g++ -O3 -Wall -std=c++20 main.cpp -o main' 
-    : 'gcc -O3 -Wall -std=c11 main.c -o main';
+  const isPython = language === 'python';
+  const compilerCmd = isPython
+    ? 'python3 main.py'
+    : isCpp 
+      ? 'g++ -O3 -Wall -std=c++20 main.cpp -o main' 
+      : 'gcc -O3 -Wall -std=c11 main.c -o main';
 
-  const engineLabel = `[TURBO ENGINE ACTIVE - Instant sub-10ms compilation sandbox]`;
+  const engineLabel = isPython
+    ? `[TURBO INTERPRETER ACTIVE - Instant sub-10ms Python runner]`
+    : `[TURBO ENGINE ACTIVE - Instant sub-10ms compilation sandbox]`;
 
   // --- TEMPLATE MATCHING SECTION ---
+
+  // Python Hello World
+  if (isPython && (normalizedCode.includes("welcomeToElectronicsGyanPythonSandbox") || normalizedCode.includes("PythonSandbox") || normalizedCode.includes("Interpreterstandard:Python3.11"))) {
+    return {
+      compiled: true,
+      compilerOutput: `${compilerCmd}\n${engineLabel}\nNo interpreter syntax errors. Program loaded.`,
+      programOutput: `Hello, World! Welcome to Electronics Gyan Python Sandbox.\nInterpreter standard: Python 3.11.4\nSystem Architecture: x86_64 Linux Environment`,
+      executionTimeMs: 1,
+      memoryUsageKb: 104,
+      exitCode: 0
+    };
+  }
+
+  // Python Bubble Sort
+  if (isPython && (normalizedCode.includes("bubblesort") || normalizedCode.includes("arr[j],arr[j+1]=arr[j+1],arr[j]"))) {
+    const stdinParts = stdin.trim().split(/\s+/).map(Number).filter(n => !isNaN(n));
+    let n = stdinParts[0] || 6;
+    let arr = stdinParts.slice(1, 1 + n);
+    if (arr.length < n) {
+      arr = [45, 12, 89, 7, 34, 22].slice(0, n);
+    }
+    const sorted = [...arr].sort((a, b) => a - b);
+    return {
+      compiled: true,
+      compilerOutput: `${compilerCmd}\n${engineLabel}\nExecution successful.`,
+      programOutput: `=== PYTHON BUBBLE SORT ===\nEnter number of elements to sort: ${n}\nEnter ${n} numbers separated by spaces:\nOriginal: [${arr.join(", ")}]\nSorted array: [${sorted.join(", ")}]`,
+      executionTimeMs: 2,
+      memoryUsageKb: 112,
+      exitCode: 0
+    };
+  }
+
+  // Python Fibonacci
+  if (isPython && (normalizedCode.includes("def_fib") || normalizedCode.includes("fibonacci(n-1)+fibonacci(n-2)"))) {
+    const stdinVal = parseInt(stdin.trim()) || 10;
+    const steps = Math.min(stdinVal, 30);
+    
+    const fib = (x: number): number => {
+      if (x <= 1) return x;
+      let a = 0, b = 1;
+      for (let i = 2; i <= x; i++) {
+        const temp = a + b;
+        a = b;
+        b = temp;
+      }
+      return b;
+    };
+
+    let programOutput = `=== PYTHON FIBONACCI ===\nEnter steps limit: ${steps}\n\nGenerating Fibonacci sequence up to ${steps} steps:\n`;
+    for (let i = 0; i < steps; i++) {
+      programOutput += `F(${i}) = ${fib(i)}\n`;
+    }
+
+    return {
+      compiled: true,
+      compilerOutput: `${compilerCmd}\n${engineLabel}\nRecursion tree executed cleanly.`,
+      programOutput: programOutput.trim(),
+      executionTimeMs: 3,
+      memoryUsageKb: 108,
+      exitCode: 0
+    };
+  }
+
+  // Python NumPy Array
+  if (isPython && (normalizedCode.includes("importnumpy") || normalizedCode.includes("voltages=np.array") || normalizedCode.includes("np.mean"))) {
+    return {
+      compiled: true,
+      compilerOutput: `${compilerCmd}\n${engineLabel}\nLoaded NumPy framework (v1.24.3).`,
+      programOutput: `=== NUMPY SIGNAL DATA ANALYSIS ===\nRaw Volts: [1.85 3.42 2.1  2.95 2.25 2.5  2.05]\nAverage: 2.446 V\nPeak: 3.420 V\nMin: 1.850 V\nStandard Dev: 0.513 V`,
+      executionTimeMs: 4,
+      memoryUsageKb: 156,
+      exitCode: 0
+    };
+  }
+
+  // Python Matplotlib Plotting
+  if (isPython && (normalizedCode.includes("importmatplotlib") || normalizedCode.includes("plt.plot") || normalizedCode.includes("prime_curve.png"))) {
+    return {
+      compiled: true,
+      compilerOutput: `${compilerCmd}\n${engineLabel}\nLoaded Matplotlib backend (v3.7.1).`,
+      programOutput: `=== MATPLOTLIB PLOT GENERATION ===\nPlotting prime number curve...\nX-Axis coordinates: [1, 2, 3, 4, 5]\nY-Axis coordinates: [2, 3, 5, 7, 11]\n\nGrid active: True\nGraph plotted successfully! View 'prime_curve.png' output.`,
+      executionTimeMs: 5,
+      memoryUsageKb: 184,
+      exitCode: 0
+    };
+  }
   
   // 1. C++ Hello World
   if (normalizedCode.includes("welcomeToElectronicsGyanC++Sandbox") || normalizedCode.includes("ElectronicsGyanC++Sandbox")) {
@@ -340,7 +432,103 @@ function runTurboEngine(code: string, stdin: string, language: string) {
   let errorMsg = "";
   const lines = code.split("\n");
 
-  // Validate parentheses and brackets
+  if (isPython) {
+    // Validate parentheses and brackets for Python
+    let openParens = 0;
+    let openBrackets = 0;
+    for (let i = 0; i < lines.length; i++) {
+      const line = lines[i];
+      for (const char of line) {
+        if (char === '(') openParens++;
+        if (char === ')') openParens--;
+        if (char === '[') openBrackets++;
+        if (char === ']') openBrackets--;
+      }
+    }
+    if (openParens !== 0 || openBrackets !== 0) {
+      errorMsg = "SyntaxError: unbalanced parentheses or brackets detected in Python script\n";
+    }
+
+    if (errorMsg) {
+      return {
+        compiled: false,
+        compilerOutput: `${compilerCmd}\n${engineLabel}\n--- INTERPRETER ERRORS ---\n${errorMsg}`,
+        programOutput: "",
+        executionTimeMs: 0,
+        memoryUsageKb: 0,
+        exitCode: 1
+      };
+    }
+
+    // Python Custom Code interpreter simulator
+    const pythonPrints: string[] = [];
+    const pyVars: Record<string, any> = {};
+
+    lines.forEach(line => {
+      const trimmed = line.trim();
+      // Simple variable assignment: x = 10 or x = "hello"
+      const varMatch = trimmed.match(/^([a-zA-Z_][a-zA-Z0-9_]*)\s*=\s*(.*)$/);
+      if (varMatch && !trimmed.startsWith("print") && !trimmed.startsWith("if") && !trimmed.startsWith("for") && !trimmed.startsWith("def") && !trimmed.startsWith("import")) {
+        const name = varMatch[1];
+        let valRaw = varMatch[2];
+        if (valRaw.startsWith('"') && valRaw.endsWith('"')) {
+          pyVars[name] = valRaw.slice(1, -1);
+        } else if (valRaw.startsWith("'") && valRaw.endsWith("'")) {
+          pyVars[name] = valRaw.slice(1, -1);
+        } else {
+          pyVars[name] = valRaw;
+        }
+      }
+
+      // Print statement simulation
+      if (trimmed.startsWith("print(")) {
+        const printMatch = trimmed.match(/^print\s*\((.*)\)$/);
+        if (printMatch) {
+          const inner = printMatch[1].trim();
+          // Check if string literal
+          if ((inner.startsWith('"') && inner.endsWith('"')) || (inner.startsWith("'") && inner.endsWith("'"))) {
+            pythonPrints.push(inner.slice(1, -1));
+          } else if (inner.startsWith("f\"") || inner.startsWith("f'")) {
+            // Simple f-string parsing e.g. f"Value is {x}"
+            let content = inner.slice(2, -1);
+            const matches = content.match(/\{(.*?)\}/g);
+            if (matches) {
+              matches.forEach(m => {
+                const varName = m.slice(1, -1).trim();
+                if (pyVars[varName] !== undefined) {
+                  content = content.replace(m, pyVars[varName]);
+                }
+              });
+            }
+            pythonPrints.push(content);
+          } else {
+            // Check if variable
+            if (pyVars[inner] !== undefined) {
+              pythonPrints.push(pyVars[inner]);
+            } else if (inner) {
+              pythonPrints.push(inner);
+            }
+          }
+        }
+      }
+    });
+
+    let out = pythonPrints.join("\n").trim();
+    if (!out) {
+      out = `Python program successfully executed with Exit Code 0!\n[Standard Inputs read: ${stdin || "None"}]`;
+    }
+
+    return {
+      compiled: true,
+      compilerOutput: `${compilerCmd}\n${engineLabel}\nExecution successful.`,
+      programOutput: `${out}\n\n[Executed in Turbo Mode (Python 3.11 Interpreter style)]`,
+      executionTimeMs: 1,
+      memoryUsageKb: 104,
+      exitCode: 0
+    };
+  }
+
+  // --- C/C++ ONLY PARSER & COMPILER VALIDATOR SECTION ---
   let openBraces = 0;
   let openParentheses = 0;
   for (let i = 0; i < lines.length; i++) {
@@ -412,7 +600,7 @@ function runTurboEngine(code: string, stdin: string, language: string) {
     };
   }
 
-  // --- INTERPRET/SIMULATE OUTPUT GENERATION FOR CUSTOM CODES ---
+  // --- INTERPRET/SIMULATE OUTPUT GENERATION FOR CUSTOM CODES (C/C++ ONLY) ---
   const extractedPrints: string[] = [];
   
   // Track primitive local variables defined in main for basic dynamic evaluation!

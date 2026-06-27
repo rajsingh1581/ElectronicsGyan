@@ -376,11 +376,115 @@ int main() {
     return 0;
 }`,
     defaultStdin: ''
+  },
+  // PYTHON TEMPLATES
+  {
+    id: 'hello_world_py',
+    name: 'Python Hello World',
+    language: 'python',
+    icon: FileCode,
+    description: 'Standard Python entry program greeting user and welcoming to sandbox.',
+    code: `print("Hello, World! Welcome to Electronics Gyan Python Sandbox.")
+print("Interpreter standard: Python 3.11.4")
+print("System Architecture: x86_64 Linux Environment")`,
+    defaultStdin: ''
+  },
+  {
+    id: 'bubble_sort_py',
+    name: 'Python Bubble Sort',
+    language: 'python',
+    icon: Cpu,
+    description: 'Sorts standard arrays recursively or iteratively using native structures.',
+    code: `# Read numbers from stdin
+print("=== PYTHON BUBBLE SORT ===")
+try:
+    n = int(input("Enter number of elements to sort: "))
+except Exception:
+    n = 6
+    print(f"Using default count: {n}")
+
+print(f"Enter {n} numbers separated by spaces:")
+try:
+    arr = [int(x) for x in input().split()[:n]]
+except Exception:
+    arr = [45, 12, 89, 7, 34, 22]
+
+print(f"Original: {arr}")
+for i in range(len(arr)):
+    for j in range(0, len(arr)-i-1):
+        if arr[j] > arr[j+1]:
+            arr[j], arr[j+1] = arr[j+1], arr[j]
+print(f"Sorted array: {arr}")`,
+    defaultStdin: "6\n45 12 89 7 34 22"
+  },
+  {
+    id: 'fibonacci_py',
+    name: 'Python Recursive Fibonacci',
+    language: 'python',
+    icon: Sparkles,
+    description: 'Computes Fibonacci sequence up to specified limit recursively.',
+    code: `def fibonacci(n):
+    if n <= 1:
+        return n
+    return fibonacci(n-1) + fibonacci(n-2)
+
+print("=== PYTHON FIBONACCI ===")
+try:
+    steps = int(input("Enter steps limit: "))
+except Exception:
+    steps = 10
+
+if steps > 30:
+    steps = 30
+    print("Capped at 30 to prevent recursion depth limit.")
+
+print(f"\\nGenerating Fibonacci sequence up to {steps} steps:")
+for i in range(steps):
+    print(f"F({i}) = {fibonacci(i)}")`,
+    defaultStdin: "10"
+  },
+  {
+    id: 'numpy_py',
+    name: 'NumPy Data Analysis',
+    language: 'python',
+    icon: Terminal,
+    description: 'Calculates dynamic metrics for sensor signals using NumPy.',
+    code: `# Simulate standard numeric analysis using NumPy
+import numpy as np
+
+print("=== NUMPY SIGNAL DATA ANALYSIS ===")
+# Simulated ADC samples
+voltages = np.array([1.85, 3.42, 2.10, 2.95, 2.25, 2.50, 2.05])
+print(f"Raw Volts: {voltages}")
+print(f"Average: {np.mean(voltages):.3f} V")
+print(f"Peak: {np.max(voltages):.3f} V")
+print(f"Min: {np.min(voltages):.3f} V")
+print(f"Standard Dev: {np.std(voltages):.3f} V")`,
+    defaultStdin: ''
+  },
+  {
+    id: 'matplotlib_py',
+    name: 'Matplotlib Graph Ploter',
+    language: 'python',
+    icon: FileCode,
+    description: 'Plots Prime curves and coordinates using Matplotlib standard engine.',
+    code: `import matplotlib.pyplot as plt
+
+print("=== MATPLOTLIB PLOT GENERATION ===")
+x = [1, 2, 3, 4, 5]
+y = [2, 3, 5, 7, 11]
+
+print("Plotting prime number curve...")
+print(f"X-Axis coordinates: {x}")
+print(f"Y-Axis coordinates: {y}")
+print("\\nGrid active: True")
+print("Graph plotted successfully! View 'prime_curve.png' output.")`,
+    defaultStdin: ''
   }
 ];
 
 export default function CompilerPage() {
-  const [language, setLanguage] = useState<'cpp' | 'c'>('cpp');
+  const [language, setLanguage] = useState<'cpp' | 'c' | 'python'>('cpp');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('hello_world');
   const [code, setCode] = useState<string>(TEMPLATES[0].code);
   const [stdin, setStdin] = useState<string>('');
@@ -407,7 +511,7 @@ export default function CompilerPage() {
   const filteredTemplates = TEMPLATES.filter(t => t.language === language);
 
   // Handle language switch
-  const handleLanguageChange = (newLang: 'cpp' | 'c') => {
+  const handleLanguageChange = (newLang: 'cpp' | 'c' | 'python') => {
     setLanguage(newLang);
     // Select first template of the new language
     const defaultTemplate = TEMPLATES.find(t => t.language === newLang);
@@ -417,7 +521,7 @@ export default function CompilerPage() {
       setStdin(defaultTemplate.defaultStdin || '');
       setCompiled(null);
       setCompilerLogs('');
-      setProgramLogs(`Loaded ${defaultTemplate.name}. Compiler set to ${newLang === 'cpp' ? 'G++ 13.2' : 'GCC 13.2'}`);
+      setProgramLogs(`Loaded ${defaultTemplate.name}. Environment set to ${newLang === 'python' ? 'Python 3.11 Interpreter' : newLang === 'cpp' ? 'G++ 13.2' : 'GCC 13.2'}`);
       setExecTime(null);
       setMemoryUsage(null);
       setExitCode(null);
@@ -440,17 +544,22 @@ export default function CompilerPage() {
     }
   };
 
-  // Perform C/C++ Code execution by communicating with server API
+  // Perform Code execution by communicating with server API
   const handleExecute = async (optimize: boolean = false) => {
     setIsLoading(true);
     setCompiled(null);
     
-    const binaryName = language === 'cpp' ? 'g++' : 'gcc';
-    const stdFlag = language === 'cpp' ? '-std=c++20' : '-std=c11';
-    const fileExtension = language === 'cpp' ? 'cpp' : 'c';
+    const isPy = language === 'python';
+    const binaryName = isPy ? 'python3' : language === 'cpp' ? 'g++' : 'gcc';
+    const stdFlag = isPy ? '' : language === 'cpp' ? '-std=c++20' : '-std=c11';
+    const fileExtension = isPy ? 'py' : language === 'cpp' ? 'cpp' : 'c';
     
-    setCompilerLogs(`Initiating ${binaryName} build system...\n$ ${binaryName} ${optimize ? '-O3' : '-O0'} -Wall ${stdFlag} main.${fileExtension} -o main`);
-    setProgramLogs('Assembling logic blocks & mounting dynamic stack frames...');
+    if (isPy) {
+      setCompilerLogs(`Initiating Python execution system...\n$ python3 main.py`);
+    } else {
+      setCompilerLogs(`Initiating ${binaryName} build system...\n$ ${binaryName} ${optimize ? '-O3' : '-O0'} -Wall ${stdFlag} main.${fileExtension} -o main`);
+    }
+    setProgramLogs(isPy ? 'Running Python VM process...' : 'Assembling logic blocks & mounting dynamic stack frames...');
     setExecTime(null);
     setMemoryUsage(null);
     setExitCode(null);
@@ -474,20 +583,20 @@ export default function CompilerPage() {
 
       if (data.success) {
         setCompiled(data.compiled);
-        setCompilerLogs(data.compilerOutput || `${binaryName}: build successful. ELF static link established.`);
+        setCompilerLogs(data.compilerOutput || (isPy ? 'Python execution successful.' : `${binaryName}: build successful. ELF static link established.`));
         setProgramLogs(data.programOutput || 'No stdout generated.');
         setExecTime(data.executionTimeMs ?? 1);
-        setMemoryUsage(data.memoryUsageKb ?? (language === 'cpp' ? 128 : 64));
+        setMemoryUsage(data.memoryUsageKb ?? (isPy ? 104 : language === 'cpp' ? 128 : 64));
         setExitCode(data.exitCode ?? 0);
       } else {
         setCompiled(false);
-        setCompilerLogs(`${binaryName} fatal error: build stream interrupted.\n` + (data.error || 'General execution fault.'));
+        setCompilerLogs(isPy ? 'Python execution error:\n' + (data.error || 'General interpreter fault.') : `${binaryName} fatal error: build stream interrupted.\n` + (data.error || 'General execution fault.'));
         setProgramLogs('');
         setExitCode(1);
       }
     } catch (err: any) {
       setCompiled(false);
-      setCompilerLogs(`Linker Exception: Build process timed out.\nError: ${err.message}`);
+      setCompilerLogs(isPy ? `Interpreter Exception: Run process timed out.\nError: ${err.message}` : `Linker Exception: Build process timed out.\nError: ${err.message}`);
       setProgramLogs('');
       setExitCode(1);
     } finally {
@@ -520,7 +629,7 @@ export default function CompilerPage() {
           <div className="flex items-center space-x-2 text-sm text-gray-400">
             <Link href="/" className="hover:text-brand transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
-            <span className="text-white font-medium">Online C/C++ Compiler</span>
+            <span className="text-white font-medium">Online Compilers</span>
           </div>
           <Link href="/tutorial" className="inline-flex items-center text-xs text-brand hover:text-brand-light font-semibold transition-all">
             <Code2 className="w-3.5 h-3.5 mr-1" /> View Tutorials
@@ -540,10 +649,10 @@ export default function CompilerPage() {
                 <span className="text-xs text-gray-400">• High Speed Sandbox</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-extrabold font-heading text-white tracking-tight mb-4">
-                Online <span className="text-brand">C/C++ Compiler</span>
+                Online <span className="text-brand">Compilers</span>
               </h1>
               <p className="text-gray-400 text-sm sm:text-base max-w-3xl leading-relaxed">
-                Choose C or C++ compilers. Experience lightning-fast builds as fast as OnlineGDB using the dedicated Turbo Engine. Write, run, and inspect standard stream operations in milliseconds.
+                Choose C, C++, or Python. Experience lightning-fast builds and runs using our dual engine: the local microsecond Turbo Sim or the full contextual AI Sandbox.
               </p>
             </div>
             
@@ -552,8 +661,8 @@ export default function CompilerPage() {
                 <Cpu className="h-8 w-8 text-brand" />
               </div>
               <div>
-                <p className="text-xs text-gray-400">GNU Compiler Suite</p>
-                <p className="text-sm font-bold text-white font-mono">GCC/G++ 13.2</p>
+                <p className="text-xs text-gray-400">Multi-Language Sandbox</p>
+                <p className="text-sm font-bold text-white font-mono">GCC/G++ 13.2 & Python 3.11</p>
               </div>
             </div>
           </div>
@@ -585,6 +694,12 @@ export default function CompilerPage() {
                     className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${language === 'c' ? 'bg-brand text-white' : 'text-gray-400 hover:text-white'}`}
                   >
                     C (GCC)
+                  </button>
+                  <button
+                    onClick={() => handleLanguageChange('python')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${language === 'python' ? 'bg-brand text-white' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    Python
                   </button>
                 </div>
               </div>

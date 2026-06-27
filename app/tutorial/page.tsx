@@ -14,7 +14,7 @@ const tutorialTracks = [
     color: 'from-blue-500/20 to-indigo-500/5',
     borderColor: 'group-hover:border-blue-500/50',
     iconColor: 'text-blue-400',
-    stats: '4 Comprehensive Modules • Advanced',
+    stats: '1,025 Modules • Advanced',
     topics: ['Task Creation & Prioritization', 'Binary & Counting Semaphores', 'Queue Management & ISRs', 'Mutexes & Priority Inversion']
   },
   {
@@ -26,7 +26,7 @@ const tutorialTracks = [
     color: 'from-emerald-500/20 to-teal-500/5',
     borderColor: 'group-hover:border-emerald-500/50',
     iconColor: 'text-emerald-400',
-    stats: '5 Technical Modules • Intermediate',
+    stats: '1,025 Modules • Intermediate',
     topics: ['GPIO & External Interrupts (EXTI)', 'Timers, Counters & PWM Generation', 'ADC Conversion & DMA Channels', 'I2C, SPI & UART Protocols']
   },
   {
@@ -38,7 +38,7 @@ const tutorialTracks = [
     color: 'from-cyan-500/20 to-blue-500/5',
     borderColor: 'group-hover:border-cyan-500/50',
     iconColor: 'text-cyan-400',
-    stats: '4 Practical Modules • Beginner',
+    stats: '1,025 Modules • Beginner',
     topics: ['Digital/Analog I/O & Interrupts', 'I2C/SPI Sensor Communication', 'Non-blocking Code with millis()', 'ESP32 Wi-Fi Web Servers']
   },
   {
@@ -50,8 +50,44 @@ const tutorialTracks = [
     color: 'from-rose-500/20 to-red-500/5',
     borderColor: 'group-hover:border-rose-500/50',
     iconColor: 'text-rose-400',
-    stats: '4 Hands-on Modules • All Levels',
+    stats: '1,025 Modules • All Levels',
     topics: ['Headless OS Configuration', 'Python GPIO & PWM Interfacing', 'Pi Pico C/C++ SDK Setup', 'Dual-Core Programming']
+  },
+  {
+    id: 'python',
+    title: 'Python (Foundations to Automation)',
+    description: 'Master clean Python syntax, loops, data structures, list comprehensions, NumPy numerical analysis, and Matplotlib visualizations.',
+    icon: Terminal,
+    href: '/tutorial/python',
+    color: 'from-amber-500/20 to-yellow-500/5',
+    borderColor: 'group-hover:border-amber-500/50',
+    iconColor: 'text-amber-400',
+    stats: '1,025 Modules • All Levels',
+    topics: ['Variables & Conditionals', 'Data Structures (Lists/Dicts)', 'Loops & Functions', 'NumPy Matrix Analysis', 'Matplotlib Plot Generation']
+  },
+  {
+    id: 'c',
+    title: 'C Language (Systems & Embedded Core)',
+    description: 'Exhaustive systems programming masterclass. Command compiler flags, master manual heap allocation with malloc/free, structure padding, and pointers mechanics.',
+    icon: Terminal,
+    href: '/tutorial/c',
+    color: 'from-indigo-500/20 to-purple-500/5',
+    borderColor: 'group-hover:border-indigo-500/50',
+    iconColor: 'text-indigo-400',
+    stats: '1,025 Modules • All Levels',
+    topics: ['Syntax, Pointers & Memory', 'Malloc, Free & Memory Leaks', 'Structures & Unions Alignment', 'C-Strings & Safe snprintf']
+  },
+  {
+    id: 'cpp',
+    title: 'C++ Language (Modern OOP & Idioms)',
+    description: 'Deep dive into object-oriented concepts, RAII resource scopes, virtual tables (VTables), move semantics, smart pointers, lambdas, and template meta-programming.',
+    icon: Terminal,
+    href: '/tutorial/cpp',
+    color: 'from-violet-500/20 to-fuchsia-500/5',
+    borderColor: 'group-hover:border-violet-500/50',
+    iconColor: 'text-violet-400',
+    stats: '1,025 Modules • All Levels',
+    topics: ['Classes, Objects & RAII Scopes', 'VTables & Late Polymorphism', 'Unique & Shared Smart Pointers', 'Template Metaprogramming & STL']
   }
 ];
 

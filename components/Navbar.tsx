@@ -36,10 +36,11 @@ const navItems = [
       { label: 'STM32', href: '/tutorial/stm32' },
       { label: 'Arduino', href: '/tutorial/arduino' },
       { label: 'Raspberry Pi', href: '/tutorial/raspberry-pi' },
+      { label: 'Python', href: '/tutorial/python' },
     ],
   },
   {
-    label: 'C++ Compiler',
+    label: 'Compilers',
     href: '/compiler',
     icon: Terminal,
   },
