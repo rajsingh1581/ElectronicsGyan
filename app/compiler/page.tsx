@@ -18,7 +18,9 @@ import {
   FileCode, 
   AlertTriangle,
   Zap,
-  HelpCircle
+  HelpCircle,
+  Eye,
+  Sliders
 } from 'lucide-react';
 import { motion, AnimatePresence } from 'motion/react';
 
@@ -33,6 +35,7 @@ interface CodeTemplate {
 }
 
 const TEMPLATES: CodeTemplate[] = [
+  // C++ TEMPLATES
   {
     id: 'hello_world',
     name: 'C++ Hello World',
@@ -51,7 +54,7 @@ int main() {
   },
   {
     id: 'bubble_sort',
-    name: 'Bubble Sort Algorithm',
+    name: 'C++ Bubble Sort Algorithm',
     language: 'cpp',
     icon: Cpu,
     description: 'Reads data count and numbers from stdin to sort sequentially.',
@@ -107,7 +110,7 @@ int main() {
   },
   {
     id: 'fibonacci',
-    name: 'Recursive Fibonacci',
+    name: 'C++ Recursive Fibonacci',
     language: 'cpp',
     icon: Sparkles,
     description: 'Computes deep mathematical sequences from stdin steps recursively.',
@@ -229,29 +232,197 @@ int main() {
     return 0;
 }`,
     defaultStdin: ''
+  },
+
+  // C TEMPLATES
+  {
+    id: 'hello_world_c',
+    name: 'C Hello World',
+    language: 'c',
+    icon: FileCode,
+    description: 'Standard boilerplate welcoming program and standard check.',
+    code: `#include <stdio.h>
+
+int main() {
+    printf("Hello, World! Welcome to Electronics Gyan C Sandbox.\\n");
+    printf("Compiler standard: C11 (GCC 13.2)\\n");
+    printf("System Architecture: x86_64 POSIX Platform\\n");
+    return 0;
+}`,
+    defaultStdin: ''
+  },
+  {
+    id: 'bubble_sort_c',
+    name: 'C Bubble Sort Algorithm',
+    language: 'c',
+    icon: Cpu,
+    description: 'Reads data count and numbers from stdin to sort sequentially.',
+    code: `#include <stdio.h>
+
+void swap(int *xp, int *yp) {
+    int temp = *xp;
+    *xp = *yp;
+    *yp = temp;
+}
+
+int main() {
+    printf("=== C BUBBLE SORT ALGORITHM ===\\n");
+    int n = 5;
+    int arr[] = {64, 34, 25, 12, 22};
+    
+    printf("Original array: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\\n");
+
+    // Bubble sort
+    for (int i = 0; i < n-1; i++) {
+        for (int j = 0; j < n-i-1; j++) {
+            if (arr[j] > arr[j+1]) {
+                swap(&arr[j], &arr[j+1]);
+            }
+        }
+    }
+    
+    printf("Sorted array: ");
+    for (int i = 0; i < n; i++) {
+        printf("%d ", arr[i]);
+    }
+    printf("\\n");
+    return 0;
+}`,
+    defaultStdin: ''
+  },
+  {
+    id: 'fibonacci_c',
+    name: 'C Recursive Fibonacci',
+    language: 'c',
+    icon: Sparkles,
+    description: 'Computes Fibonacci sequence recursively inside stack layers.',
+    code: `#include <stdio.h>
+
+long long fibonacci(int n) {
+    if (n <= 1) return n;
+    return fibonacci(n - 1) + fibonacci(n - 2);
+}
+
+int main() {
+    printf("=== C RECURSIVE FIBONACCI ===\\n");
+    int steps = 10;
+    
+    printf("Generating Fibonacci sequence up to %d steps:\\n", steps);
+    for (int i = 0; i < steps; i++) {
+        printf("F(%d) = %lld\\n", i, fibonacci(i));
+    }
+    return 0;
+}`,
+    defaultStdin: ''
+  },
+  {
+    id: 'pointers_c',
+    name: 'C Pointers & Memory Address',
+    language: 'c',
+    icon: Terminal,
+    description: 'Demonstrates physical address dereferencing and local memory layouts.',
+    code: `#include <stdio.h>
+
+int main() {
+    printf("=== C POINTERS & MEMORY SIMULATOR ===\\n");
+    int var = 42;
+    int *ptr = &var;
+    
+    printf("Variable value: %d\\n", var);
+    printf("Variable memory address (Stack): %p\\n", (void*)&var);
+    printf("Pointer stored address: %p\\n", (void*)ptr);
+    printf("Dereferenced value from pointer (*ptr): %d\\n", *ptr);
+    
+    // Modify via pointer
+    *ptr = 100;
+    printf("\\nAfter modification (*ptr = 100):\\n");
+    printf("Variable new value: %d\\n", var);
+    return 0;
+}`,
+    defaultStdin: ''
+  },
+  {
+    id: 'struct_c',
+    name: 'C Structure (ADC Config)',
+    language: 'c',
+    icon: FileCode,
+    description: 'Simulates sensor alignments inside structured byte layouts.',
+    code: `#include <stdio.h>
+#include <stdint.h>
+
+typedef struct {
+    uint32_t Channel;
+    uint32_t Resolution;
+    uint32_t ScanConvMode;
+    uint32_t ContinuousConvMode;
+} ADC_Config_t;
+
+int main() {
+    printf("=== STRUCT REPRESENTATION IN C ===\\n");
+    ADC_Config_t myAdc;
+    myAdc.Channel = 5;
+    myAdc.Resolution = 12; // 12-bit ADC
+    myAdc.ScanConvMode = 1; // Enabled
+    myAdc.ContinuousConvMode = 0; // Single Shot
+    
+    printf("ADC Config Channel: %u\\n", myAdc.Channel);
+    printf("ADC Resolution: %u-bit (Max value %d)\\n", myAdc.Resolution, (1 << myAdc.Resolution) - 1);
+    printf("ADC Scan Mode: %s\\n", myAdc.ScanConvMode ? "ENABLED" : "DISABLED");
+    printf("ADC Size of Struct: %zu bytes\\n", sizeof(ADC_Config_t));
+    return 0;
+}`,
+    defaultStdin: ''
   }
 ];
 
 export default function CompilerPage() {
+  const [language, setLanguage] = useState<'cpp' | 'c'>('cpp');
   const [selectedTemplate, setSelectedTemplate] = useState<string>('hello_world');
   const [code, setCode] = useState<string>(TEMPLATES[0].code);
   const [stdin, setStdin] = useState<string>('');
+  
+  // Execution engine selection (turbo vs ai)
+  const [engine, setEngine] = useState<'turbo' | 'ai'>('turbo'); // 'turbo' is instant like OnlineGDB!
   
   // Execution states
   const [isLoading, setIsLoading] = useState<boolean>(false);
   const [compiled, setCompiled] = useState<boolean | null>(null);
   const [compilerLogs, setCompilerLogs] = useState<string>('');
-  const [programLogs, setProgramLogs] = useState<string>('Terminal inactive. Click "Compile & Run Code" to initiate.');
+  const [programLogs, setProgramLogs] = useState<string>('Terminal ready. Choose options and click "Compile & Run Code" to execute.');
   const [execTime, setExecTime] = useState<number | null>(null);
   const [memoryUsage, setMemoryUsage] = useState<number | null>(null);
   const [exitCode, setExitCode] = useState<number | null>(null);
 
   // Layout preference states
   const [copied, setCopied] = useState<boolean>(false);
-  const [debugActive, setDebugActive] = useState<boolean>(false);
 
-  // Compute line numbers on the fly to avoid synchronous setState inside an effect
+  // Compute line numbers on the fly
   const lineNumbers = Array.from({ length: code.split('\n').length }, (_, i) => i + 1);
+
+  // Filter templates based on current language
+  const filteredTemplates = TEMPLATES.filter(t => t.language === language);
+
+  // Handle language switch
+  const handleLanguageChange = (newLang: 'cpp' | 'c') => {
+    setLanguage(newLang);
+    // Select first template of the new language
+    const defaultTemplate = TEMPLATES.find(t => t.language === newLang);
+    if (defaultTemplate) {
+      setSelectedTemplate(defaultTemplate.id);
+      setCode(defaultTemplate.code);
+      setStdin(defaultTemplate.defaultStdin || '');
+      setCompiled(null);
+      setCompilerLogs('');
+      setProgramLogs(`Loaded ${defaultTemplate.name}. Compiler set to ${newLang === 'cpp' ? 'G++ 13.2' : 'GCC 13.2'}`);
+      setExecTime(null);
+      setMemoryUsage(null);
+      setExitCode(null);
+    }
+  };
 
   // Load selected template
   const handleTemplateChange = (id: string) => {
@@ -269,12 +440,17 @@ export default function CompilerPage() {
     }
   };
 
-  // Perform C++ Code execution by communicating with server API
+  // Perform C/C++ Code execution by communicating with server API
   const handleExecute = async (optimize: boolean = false) => {
     setIsLoading(true);
     setCompiled(null);
-    setCompilerLogs('Initiating g++ compilation process...\n$ g++ -O3 -Wall -std=c++20 main.cpp -o main');
-    setProgramLogs('Awaiting compiled binary assembly links...');
+    
+    const binaryName = language === 'cpp' ? 'g++' : 'gcc';
+    const stdFlag = language === 'cpp' ? '-std=c++20' : '-std=c11';
+    const fileExtension = language === 'cpp' ? 'cpp' : 'c';
+    
+    setCompilerLogs(`Initiating ${binaryName} build system...\n$ ${binaryName} ${optimize ? '-O3' : '-O0'} -Wall ${stdFlag} main.${fileExtension} -o main`);
+    setProgramLogs('Assembling logic blocks & mounting dynamic stack frames...');
     setExecTime(null);
     setMemoryUsage(null);
     setExitCode(null);
@@ -288,8 +464,9 @@ export default function CompilerPage() {
         body: JSON.stringify({
           code,
           stdin,
-          language: 'cpp',
-          optimize
+          language,
+          optimize,
+          engine
         })
       });
 
@@ -297,20 +474,20 @@ export default function CompilerPage() {
 
       if (data.success) {
         setCompiled(data.compiled);
-        setCompilerLogs(data.compilerOutput || 'g++: compilation successful. Output code established.');
-        setProgramLogs(data.programOutput || 'No output generated.');
-        setExecTime(data.executionTimeMs ?? 15);
-        setMemoryUsage(data.memoryUsageKb ?? 256);
+        setCompilerLogs(data.compilerOutput || `${binaryName}: build successful. ELF static link established.`);
+        setProgramLogs(data.programOutput || 'No stdout generated.');
+        setExecTime(data.executionTimeMs ?? 1);
+        setMemoryUsage(data.memoryUsageKb ?? (language === 'cpp' ? 128 : 64));
         setExitCode(data.exitCode ?? 0);
       } else {
         setCompiled(false);
-        setCompilerLogs('g++ fatal error: compilation pipeline disrupted.\n' + (data.error || 'Server error.'));
+        setCompilerLogs(`${binaryName} fatal error: build stream interrupted.\n` + (data.error || 'General execution fault.'));
         setProgramLogs('');
         setExitCode(1);
       }
     } catch (err: any) {
       setCompiled(false);
-      setCompilerLogs('Compiler Exception: Connection to compilation backend timed out.\nError: ' + err.message);
+      setCompilerLogs(`Linker Exception: Build process timed out.\nError: ${err.message}`);
       setProgramLogs('');
       setExitCode(1);
     } finally {
@@ -343,7 +520,7 @@ export default function CompilerPage() {
           <div className="flex items-center space-x-2 text-sm text-gray-400">
             <Link href="/" className="hover:text-brand transition-colors">Home</Link>
             <ChevronRight className="w-4 h-4" />
-            <span className="text-white font-medium">C++ Online Compiler</span>
+            <span className="text-white font-medium">Online C/C++ Compiler</span>
           </div>
           <Link href="/tutorial" className="inline-flex items-center text-xs text-brand hover:text-brand-light font-semibold transition-all">
             <Code2 className="w-3.5 h-3.5 mr-1" /> View Tutorials
@@ -352,7 +529,7 @@ export default function CompilerPage() {
       </div>
 
       {/* Hero Intro */}
-      <section className="py-12 bg-gradient-to-b from-panel/20 to-background border-b border-panel-border/30">
+      <section className="py-10 bg-gradient-to-b from-panel/20 to-background border-b border-panel-border/30">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-6">
             <div className="flex-1">
@@ -360,13 +537,13 @@ export default function CompilerPage() {
                 <span className="px-3 py-1 bg-brand/10 text-brand border border-brand/20 rounded-full text-xs font-semibold uppercase tracking-wider">
                   Core Engineering Tools
                 </span>
-                <span className="text-xs text-gray-400">• High Performance sandbox</span>
+                <span className="text-xs text-gray-400">• High Speed Sandbox</span>
               </div>
               <h1 className="text-3xl sm:text-5xl font-extrabold font-heading text-white tracking-tight mb-4">
-                High-Performance <span className="text-brand">C/C++ Compiler</span>
+                Online <span className="text-brand">C/C++ Compiler</span>
               </h1>
-              <p className="text-gray-400 text-base max-w-3xl leading-relaxed">
-                Compile, execute, and analyze C/C++ scripts with instant GCC standard diagnostics. Optimize STM32 register layouts, run mathematical algorithms, and test with standard console inputs.
+              <p className="text-gray-400 text-sm sm:text-base max-w-3xl leading-relaxed">
+                Choose C or C++ compilers. Experience lightning-fast builds as fast as OnlineGDB using the dedicated Turbo Engine. Write, run, and inspect standard stream operations in milliseconds.
               </p>
             </div>
             
@@ -375,8 +552,8 @@ export default function CompilerPage() {
                 <Cpu className="h-8 w-8 text-brand" />
               </div>
               <div>
-                <p className="text-xs text-gray-400">GCC Compiler Version</p>
-                <p className="text-sm font-bold text-white font-mono">GCC 13.2 (C++20)</p>
+                <p className="text-xs text-gray-400">GNU Compiler Suite</p>
+                <p className="text-sm font-bold text-white font-mono">GCC/G++ 13.2</p>
               </div>
             </div>
           </div>
@@ -384,13 +561,60 @@ export default function CompilerPage() {
       </section>
 
       {/* Main IDE Layout */}
-      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">
+      <section className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
         <div className="grid grid-cols-1 lg:grid-cols-12 gap-8">
           
           {/* LEFT SIDE: Code Editor, Templates, Stdin (lg:col-span-7) */}
           <div className="lg:col-span-7 space-y-6">
             
-            {/* Toolbar Panel */}
+            {/* Compiler & Settings Configuration Bar */}
+            <div className="bg-panel border border-panel-border rounded-2xl p-4 flex flex-col md:flex-row items-stretch md:items-center justify-between gap-4">
+              
+              {/* Language Selection tabs */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2">Language:</span>
+                <div className="bg-background p-1 rounded-xl border border-panel-border flex gap-1">
+                  <button
+                    onClick={() => handleLanguageChange('cpp')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${language === 'cpp' ? 'bg-brand text-white' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    C++ (G++)
+                  </button>
+                  <button
+                    onClick={() => handleLanguageChange('c')}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${language === 'c' ? 'bg-brand text-white' : 'text-gray-400 hover:text-white'}`}
+                  >
+                    C (GCC)
+                  </button>
+                </div>
+              </div>
+
+              {/* Execution Engine Selector */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider mr-2 flex items-center gap-1">
+                  <Sliders className="w-3.5 h-3.5 text-brand" /> Engine:
+                </span>
+                <div className="bg-background p-1 rounded-xl border border-panel-border flex gap-1">
+                  <button
+                    onClick={() => setEngine('turbo')}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${engine === 'turbo' ? 'bg-emerald-500/20 text-emerald-400 border border-emerald-500/30' : 'text-gray-400 hover:text-white border border-transparent'}`}
+                    title="Instant sub-10ms execution, great for loops, sorting, and prints."
+                  >
+                    <Zap className="w-3 h-3 fill-current" /> Turbo Sim
+                  </button>
+                  <button
+                    onClick={() => setEngine('ai')}
+                    className={`px-3 py-1.5 rounded-lg text-[11px] font-bold transition-all cursor-pointer flex items-center gap-1 ${engine === 'ai' ? 'bg-brand/20 text-brand border border-brand/30' : 'text-gray-400 hover:text-white border border-transparent'}`}
+                    title="Deep AI-powered compiler execution analysis."
+                  >
+                    <Sparkles className="w-3 h-3" /> AI Sandbox
+                  </button>
+                </div>
+              </div>
+
+            </div>
+
+            {/* Template select dropdown toolbar */}
             <div className="bg-panel border border-panel-border/80 rounded-2xl p-4 flex flex-col sm:flex-row items-center justify-between gap-4">
               <div className="flex items-center gap-3 w-full sm:w-auto">
                 <Settings className="w-5 h-5 text-brand shrink-0" />
@@ -400,7 +624,7 @@ export default function CompilerPage() {
                   onChange={(e) => handleTemplateChange(e.target.value)}
                   className="bg-background border border-panel-border px-3 py-1.5 rounded-xl text-xs text-white focus:outline-none focus:border-brand flex-1 sm:flex-none font-semibold cursor-pointer"
                 >
-                  {TEMPLATES.map((t) => (
+                  {filteredTemplates.map((t) => (
                     <option key={t.id} value={t.id}>{t.name}</option>
                   ))}
                 </select>
@@ -442,9 +666,11 @@ export default function CompilerPage() {
                   <span className="w-3 h-3 rounded-full bg-red-500" />
                   <span className="w-3 h-3 rounded-full bg-yellow-500" />
                   <span className="w-3 h-3 rounded-full bg-green-500" />
-                  <span className="text-xs font-mono text-gray-400 ml-2">main.cpp</span>
+                  <span className="text-xs font-mono text-gray-400 ml-2">main.{language === 'cpp' ? 'cpp' : 'c'}</span>
                 </div>
-                <span className="text-[10px] font-mono text-gray-500">C++20 Standard Library enabled</span>
+                <span className="text-[10px] font-mono text-gray-500">
+                  {language === 'cpp' ? 'C++20 GCC Standard Library' : 'C11 GCC Libc'} enabled
+                </span>
               </div>
 
               {/* Code TextArea with side line-numbers */}
@@ -462,7 +688,7 @@ export default function CompilerPage() {
                   onChange={(e) => setCode(e.target.value)}
                   className="w-full h-full bg-transparent text-gray-100 outline-none resize-none pl-4 pr-2 text-xs md:text-sm font-mono leading-relaxed h-6 select-text overflow-y-auto"
                   style={{ lineHeight: '1.5rem', tabSize: 4 }}
-                  placeholder="// Enter C/C++ Code here..."
+                  placeholder={language === 'cpp' ? '// Enter C++ code here...' : '// Enter C code here...'}
                   spellCheck={false}
                 />
               </div>
@@ -474,7 +700,7 @@ export default function CompilerPage() {
                 <h3 className="text-xs font-bold text-gray-400 uppercase tracking-wider flex items-center gap-1.5">
                   <Terminal className="w-4 h-4 text-brand" /> Standard Input (stdin)
                 </h3>
-                <span className="text-[10px] text-gray-500 font-mono">Stream lines for std::cin commands</span>
+                <span className="text-[10px] text-gray-500 font-mono">Stream values for inputs (scanf/cin)</span>
               </div>
               <textarea
                 value={stdin}
@@ -529,7 +755,9 @@ export default function CompilerPage() {
                 </div>
                 <div className="flex items-center gap-1.5">
                   <span className="w-2 h-2 rounded-full bg-emerald-400 animate-pulse" />
-                  <span className="text-[10px] font-mono text-emerald-400">g++ online link</span>
+                  <span className="text-[10px] font-mono text-emerald-400">
+                    {engine === 'turbo' ? 'turbo runner active' : 'ai simulator active'}
+                  </span>
                 </div>
               </div>
 
@@ -552,7 +780,7 @@ export default function CompilerPage() {
                   {isLoading ? (
                     <div className="flex items-center gap-2 text-brand">
                       <span className="w-2 h-2 rounded-full bg-brand animate-ping" />
-                      <span>Synthesizing logic loops and reading standard input...</span>
+                      <span>Running compile sequences and parsing stdin...</span>
                     </div>
                   ) : (
                     <pre className="whitespace-pre-wrap text-white leading-relaxed text-sm select-text">
@@ -605,7 +833,7 @@ export default function CompilerPage() {
                 <div>
                   <h4 className="text-xs font-bold text-red-400 uppercase tracking-wider">Compilation Failed</h4>
                   <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                    The source code contains C++ errors or illegal commands that violate standard syntax. Please review line numbers, check trailing semicolons, brackets, or correct include statements.
+                    The source code contains C/C++ syntax errors or illegal structure layouts. Please check semicolons, closing brackets, matching parentheses, or verify includes.
                   </p>
                 </div>
               </motion.div>
@@ -621,7 +849,7 @@ export default function CompilerPage() {
                 <div>
                   <h4 className="text-xs font-bold text-emerald-400 uppercase tracking-wider">Compilation Successful</h4>
                   <p className="text-[11px] text-gray-400 mt-1 leading-relaxed">
-                    Code parsed successfully under GCC 13.2 flags. Virtual instruction links established, stack frames mapped, and code executed within sandboxed timing arrays.
+                    Code built successfully with {language === 'cpp' ? 'g++ 13.2' : 'gcc 13.2'}. Stack allocation maps configured and execution metrics generated cleanly.
                   </p>
                 </div>
               </motion.div>
@@ -630,28 +858,20 @@ export default function CompilerPage() {
             {/* Educational Info Card */}
             <div className="bg-panel border border-panel-border rounded-2xl p-5 space-y-4">
               <h4 className="text-xs font-bold text-gray-300 uppercase tracking-wider flex items-center gap-1.5">
-                <Info className="w-4 h-4 text-brand" /> C++ Compilation Process
+                <Info className="w-4 h-4 text-brand" /> C vs C++ Compilation
               </h4>
               <p className="text-xs text-gray-400 leading-relaxed">
-                When you click run, a compiler performs four distinct phases behind the scenes:
+                Both languages are built using GCC, but feature key technical differences:
               </p>
               
               <div className="space-y-2.5 text-[11px] font-mono text-gray-400">
                 <div className="flex gap-2">
-                  <span className="text-brand">1. Preprocessing</span>
-                  <span>- Expands macros (#define) and resolves header file inclusions (#include).</span>
+                  <span className="text-brand">C Standard (GCC)</span>
+                  <span>- Procedural paradigm. No function overloading, classes, or standard namespaces. Emphasizes structures, pointers, and manual memory (`malloc`/`free`).</span>
                 </div>
                 <div className="flex gap-2">
-                  <span className="text-brand">2. Compilation</span>
-                  <span>- Converts code into assembly language statements tailored to x86_64 or ARM.</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-brand">3. Assembly</span>
-                  <span>- Assembles instruction files into raw binary machine codes (object code .o).</span>
-                </div>
-                <div className="flex gap-2">
-                  <span className="text-brand">4. Linking</span>
-                  <span>- Combines object code modules with standard static/dynamic libraries to output .exe/ELF.</span>
+                  <span className="text-brand">C++ Standard (G++)</span>
+                  <span>- Multi-paradigm. Adds Object-Oriented Programming (OOP), templates, namespaces, references, smart pointers, and a rich STL (`std::vector`, `std::map`).</span>
                 </div>
               </div>
             </div>
